@@ -1,0 +1,6 @@
+- Dimensões da viga (largura x altura)
+- Tipo de apoios e localização dos mesmos (só em x)
+- Forças pontuais horizontais (e o ponto de atuação, em x e y... deixar mais claro as origens de x e y)
+- Forças pontuais verticais (e o ponto de atuação, em x e y... deixar mais claro as origens de x e y)
+- Forças distribuídas (dada em forma de polinômios, em conjunto com o início e fim de atuação sobre a barra... somente em x)
+- Torques e ponto de atuação dos mesmos
