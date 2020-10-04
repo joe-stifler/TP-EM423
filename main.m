@@ -1,6 +1,17 @@
 addpath('datatypes');
 addpath('solver');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Input initial values. Do not modify them %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+beam_width = 0;
+torques(1) = Force(0, 0);
+vertical_forces(1) = Force(0, 0);
+horizontal_forces(1) = Force(0, 0);
+vertical_dist_forces(1) = DistForce(0, 0, @(x)(0));
+vertical_supports(1) = Support(0, SupportType().Dummy);
+horizontal_supports(1) = Support(0, SupportType().Dummy);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The beam dimentions             %
@@ -22,8 +33,7 @@ beam_width = 4;
 % - Magnitude > 0: pointing up      %
 % - Magnitude < 0: pointing down    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_forces(1) = Force(1, 30);
-vertical_forces(2) = Force(1, 31);
+vertical_forces(length(vertical_forces) + 1) = Force(1, 30);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The horizontal forces           %
@@ -36,8 +46,7 @@ vertical_forces(2) = Force(1, 31);
 % - Magnitude > 0: pointing right   %
 % - Magnitude < 0: pointing left    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-horizontal_forces(1) = Force(0, 30);
-horizontal_forces(2) = Force(0, 31);
+horizontal_forces(length(horizontal_forces) + 1) = Force(0, 30);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The torque forces (horizontal only) %
@@ -49,9 +58,7 @@ horizontal_forces(2) = Force(0, 31);
 % - Magnitude > 0: pointing right     %
 % - Magnitude < 0: pointing left      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-torques(1) = Force(0, 30);
-torques(2) = Force(0, 31);
-torques(3) = Force(0, 32);
+torques(length(torques) + 1) = Force(0, 30);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The distributed vertical forces         %
@@ -69,8 +76,7 @@ torques(3) = Force(0, 32);
 % - polynomial_function > 0: pointing up   %
 % - polynomial_function < 0: pointing down %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_dist_forces(1) = DistForce(1, 30, @(x)(4 * x));
-vertical_dist_forces(2) = DistForce(1, 31, @(x)(4 * x * x  + y));
+vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(1, 30, @(x)(4 * x ./ x));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The horizontal supports         %
@@ -81,8 +87,7 @@ vertical_dist_forces(2) = DistForce(1, 31, @(x)(4 * x * x  + y));
 %     - SupportType().Roller       %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-horizontal_supports(1) = Support(10, SupportType().Roller);
-
+horizontal_supports(length(horizontal_supports) + 1) = Support(10, SupportType().Roller);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The vertical supports           %
@@ -93,7 +98,7 @@ horizontal_supports(1) = Support(10, SupportType().Roller);
 %     - SupportType().Fixed        %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_supports(1) = Support(10, SupportType().Roller);
+vertical_supports(length(vertical_supports) + 1) = Support(10, SupportType().Roller);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
