@@ -9,7 +9,7 @@ classdef    lib_resmat
                 supports
             )
         
-            % if there is no support, then there is nothing to do
+            % if there is no support present, then there is nothing to do
             if length(supports) == 1
                 alfa = 0
                 return
@@ -20,13 +20,11 @@ classdef    lib_resmat
                 dist_force = vertical_dist_forces(i);
                 
                 % calculates the resultant force (integrates from `beg` to `end`)
-                result_force = quadcc(dist_force.dist_func, dist_force.pos_beg, dist_force.pos_end);
-        
-                func_x = @(x) x .* dist_force.dist_func(x);
+                result_force = quadcc(@(x) (dist_force.dist_func(x) + 0 * x), dist_force.pos_beg, dist_force.pos_end);
         
                 % calculates the centroid of the force (integrates from `beg` to `end`)
-                centroid = quadcc(func_x, dist_force.pos_beg, dist_force.pos_end) / result_force;
-        
+                centroid = quadcc(@(x) (dist_force.dist_func_times_x(x) + 0 * x), dist_force.pos_beg, dist_force.pos_end) / result_force;
+                
                 % add the punctual forces to the end of the vertical forces vector
                 vertical_forces(length(vertical_forces) + 1) = Force(centroid, result_force);
             end
@@ -69,11 +67,6 @@ classdef    lib_resmat
                 -sum_momentums_forces
             ];
         
-            torque_incognitas(1) = Force(0, 0);
-            momentum_ingonitas(1) = Force(0, 0);
-            vertical_ingonitas(1) = Force(0, 0);
-            horizontal_ingonitas(1) = Force(0, 0);
-        
             num_incognitas = 0;
         
             for i = 2:length(supports)
@@ -105,73 +98,118 @@ classdef    lib_resmat
                 for i = 2:length(supports)
                     _support = supports(i);
             
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Roller support force decomposition
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     if _support.type == SupportType().Roller
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Vertical Force decomposition (and consequently the generation of momentum due to the vertical force)
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
                             A(4, num_incognitas + 1) = beam_width - _support.pos;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                             m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
 
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Pinned support force decomposition
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     elseif _support.type == SupportType().Pinned
-                        
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Torque Force decomposition
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the torque incognita column
                             A(3, num_incognitas + 1) = 1;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             t_forces(length(t_forces) + 1) = Force(0, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
             
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Horizontal Force decomposition
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the horizontal incognita column
                             A(2, num_incognitas + 1) = 1;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             h_forces(length(h_forces) + 1) = Force(0, X(num_incognitas + 1));
                         end
                         
                         num_incognitas = num_incognitas + 1;
             
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Vertical Force decomposition (and consequently the generation of momentum due to the vertical force)
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
                             A(4, num_incognitas + 1) = beam_width - _support.pos;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                             m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
             
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Fixed support force decomposition
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     elseif _support.type == SupportType().Fixed
-                    
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Torque Force decomposition
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the torque incognita column
                             A(3, num_incognitas + 1) = 1;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             t_forces(length(t_forces) + 1) = Force(0, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
 
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Horizontal Force decomposition
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the horizontal incognita column
                             A(2, num_incognitas + 1) = 1;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             h_forces(length(h_forces) + 1) = Force(0, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
                         
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Vertical Force decomposition (and consequently the generation of momentum due to the vertical force)
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
+                            % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
                             A(4, num_incognitas + 1) = beam_width - _support.pos;
                         else
+                            % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                             m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
             
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        % Momentum Force decomposition
+                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         if loopIdx == 1
                             A(4, num_incognitas + 1) = 1;
                         else

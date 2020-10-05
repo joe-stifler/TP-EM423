@@ -1,5 +1,6 @@
 addpath('datatypes');
 addpath('solver');
+addpath('tests');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input initial values. Do not modify them                               %
@@ -9,89 +10,11 @@ torques(1) = Force(0, 0);
 vertical_forces(1) = Force(0, 0);
 horizontal_forces(1) = Force(0, 0);
 supports(1) = Support(0, SupportType().Dummy);
-vertical_dist_forces(1) = DistForce(0, 0, @(x)(0));
+vertical_dist_forces(1) = DistForce(0, 0, @(x)(0), @(x)(0));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   The beam dimentions             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% You should specify the beam width %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - width in meters                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-beam_width = 4;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   The vertical forces             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Force(X_position, Magnitude)    %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - X_position should be in meters  %
-% - Magnitude should be in Newtons  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Magnitude > 0: pointing up      %
-% - Magnitude < 0: pointing down    %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_forces(length(vertical_forces) + 1) = Force(3, -5000);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   The horizontal forces           %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Force(0, Magnitude)             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Y_position should be in meters  %
-% - Magnitude should be in Newtons  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Magnitude > 0: pointing right   %
-% - Magnitude < 0: pointing left    %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-horizontal_forces(length(horizontal_forces) + 1) = Force(0, -3000);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The torque forces (horizontal only) %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Force(0, Magnitude)               %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Magnitude should be in Newtons  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Magnitude > 0: pointing right     %
-% - Magnitude < 0: pointing left      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% torques(length(torques) + 1) = Force(0, 30);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  The distributed vertical forces         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - DistForce(                             %
-%       X_begin_position,                  %
-%       X_end_position,                    %
-%       polynomial_function                %
-%   )                                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - X_begin_position in meters             %
-% - X_end_position in meters               %
-% - polynomial_function in Newtons         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - polynomial_function > 0: pointing up   %
-% - polynomial_function < 0: pointing down %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(1, 30, @(x)(4 * x ./ x));
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  The horizontal supports         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Support(X_position, SupportType) %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SupportType can be:              %
-%     - SupportType().Fixed        %
-%     - SupportType().Roller       %
-%     - SupportType().Pinned       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-supports(length(supports) + 1) = Support(0, SupportType().Fixed);
-
+% Add the input file here
+aula2_ex3;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem %
@@ -105,24 +28,4 @@ supports(length(supports) + 1) = Support(0, SupportType().Fixed);
     supports
 );
 
-for i = 2:length(v_forces)
-    printf("[Vertical force %d] [Applied at %.2e m] [Magnitude = %.2e N]\n", i - 1, v_forces(i).pos, v_forces(i).mag)
-end
-
-printf("\n");
-
-for i = 2:length(h_forces)
-    printf("[Horizontal force %d] [Applied at %.2e m] [Magnitude = %.2e N]\n", i - 1, h_forces(i).pos, h_forces(i).mag)
-end
-
-printf("\n");
-
-for i = 2:length(t_forces)
-    printf("[Torque force %d] [Applied at %.2e m] [Magnitude = %.2e N]\n", i - 1, t_forces(i).pos, t_forces(i).mag)
-end
-
-printf("\n");
-
-for i = 2:length(m_forces)
-    printf("[Momemtum force %d] [Applied at %.2e m] [Magnitude = %.2e N]\n", i - 1, m_forces(i).pos, m_forces(i).mag)
-end
+output_file(v_forces, h_forces, t_forces, m_forces);
