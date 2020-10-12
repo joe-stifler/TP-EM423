@@ -11,7 +11,13 @@ classdef    lib_resmat
         
             % if there is no support present, then there is nothing to do
             if length(supports) == 1
-                alfa = 0
+                t_forces = Force(0, 0);
+                m_forces(1) = Force(0, 0);
+                v_forces = Force(0, 0);
+                h_forces = Force(0, 0);
+
+                printf("No support specified! Returning from function without solving the problem.")
+                
                 return
             end
         
