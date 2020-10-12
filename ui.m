@@ -1,223 +1,476 @@
-addpath('datatypes')
-addpath('solver');
+classdef UI
+    properties
+        f;
+        data_beam_width;
+        data_torques;
+        data_vertical_forces;
+        data_horizontal_forces;
+        data_supports;
+        data_vertical_dist_forces;
+    end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% UI                                                                     %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function UI
-  f = figure()
-  % Properties
-  component_height = 40;
-  left_margin = 10;
-  text_width = 240;
-  edit_text_x_pos = left_margin + text_width;
-  edit_text_width = 70;
-  edit_text2_x_pos = edit_text_x_pos + edit_text_width
-  add_button_x_position = edit_text2_x_pos + edit_text_width;
-  add_button_width = 50;
-  button_width = 100;
+    methods
+        function obj = UI()
+            addpath('datatypes');
+            addpath('solver');
+            addpath('tests');
 
-  % Label
-  text_position_label          = uicontrol(f,
-                                            "style", "text",
-                                            "string", "Position",
-                                            "position",[edit_text_x_pos 320 edit_text_width 40],
-                                            "enable", "inactive");
-  text_magnitude_label          = uicontrol(f,
-                                            "style", "text",
-                                            "string", "Magnitude",
-                                            "position",[edit_text2_x_pos 320 edit_text_width 40],
-                                            "enable", "inactive");
-  % Beam
-  text_beam_width               = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "Beam width [m]: ",
-                                            "position",[left_margin 100 text_width 40],
-                                            "enable", "inactive");
-  edit_beam_width               = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position", [edit_text_x_pos 100 edit_text_width 40]);
-  button_add_beam               = uicontrol(f,
-                                            "string", "+",
-                                            "callback", {@getBeamWidth, edit_beam_width}, 
-                                            "position", [add_button_x_position 100 add_button_width 40]);
+            % Load my data
+            beam_width = 0;
+            torques(1) = Force(0, 0);
+            vertical_forces(1) = Force(0, 0);
+            horizontal_forces(1) = Force(0, 0);
+            supports(1) = Support(0, SupportType().Dummy);
+            vertical_dist_forces(1) = DistForce(0, 0, @(x)(0), @(x)(0));
 
-  % Vertical forces
-  text_vertical_forces          = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "Vertical force [N]: ",
-                                            "position",[left_margin 140 text_width 40],
-                                            "enable", "inactive");
-  edit_vertical_f_position      = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text_x_pos 140 edit_text_width 40]);
-  edit_vertical_f_mag           = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text2_x_pos 140 edit_text_width 40]);
+            % Add the input file here
+            % aula1_ex1;
 
-  button_add_vertical_forces    = uicontrol(f,
-                                            "string", "+",
-                                            "callback", {@getVerticalForces, edit_vertical_f_position, edit_vertical_f_mag},
-                                            "position", [add_button_x_position 140 add_button_width 40]);
+            obj.data_beam_width = beam_width;
+            obj.data_torques = torques;
+            obj.data_horizontal_forces = horizontal_forces;
+            obj.data_vertical_forces = vertical_forces;
+            obj.data_supports = supports;
+            obj.data_vertical_dist_forces = vertical_dist_forces;
+        end
 
-  % Horizontal forces
-  text_horizontal_forces        = uicontrol(f,
-                                            "style", "edit", "string",
-                                            "Horizontal force [N]: ",
-                                            "position",[left_margin 180 text_width 40], "enable", "inactive");
-  edit_horizontal_f_position    = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text_x_pos 180 edit_text_width 40]);
-  edit_horizontal_f_mag         = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text2_x_pos 180 edit_text_width 40]);
+        function build(obj)
+            close all;
+            clear h;
+            
+            % Plotting
+            obj.f = figure();
 
-  button_add_horizontal_forces  = uicontrol(f,
-                                            "string", "+",
-                                            "callback", {@getHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag},
-                                            "position", [add_button_x_position 180 add_button_width 40]);
+            % Properties
+            component_height = 40;
+            left_margin = 10;
+            text_width = 240;
+            edit_text_x_pos = left_margin + text_width;
+            edit_text_width = 70;
+            edit_text2_x_pos = edit_text_x_pos + edit_text_width;
+            add_button_x_position = edit_text2_x_pos + edit_text_width;
+            add_button_width = 70;
+            add_button_height = 80;
+            button_width = 100;
+            view_position = add_button_x_position + add_button_width;
+            view_width = 300;
+            % Label
+            text_position_label = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Position",
+                "position",
+                [edit_text_x_pos 370 edit_text_width 40],
+                "enable",
+                "inactive"
+            );
 
-  % Torque
-  text_torques                  = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "Torque [Nm]: ",
-                                            "position",[left_margin 220 text_width 40], "enable", "inactive");
-  edit_torque                   = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text_x_pos 220 edit_text_width 40]);
-  button_add_torques            = uicontrol(f,
-                                            "string", "+",
-                                            "callback", {@getTorques, edit_torque},
-                                            "position", [add_button_x_position 220 add_button_width 40]);
+            text_magnitude_label = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Magnitude",
+                "position",
+                [edit_text2_x_pos 370 edit_text_width 40],
+                "enable",
+                "inactive"
+            );
 
-  % Suport
-  text_horizontal_support       = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "Horizontal support x position [m]: ",
-                                            "position",[left_margin 270 text_width 40], "enable", "inactive"); 
-  edit_horizontal_support       = uicontrol(f,
-                                            "style", "edit",
-                                            "string", "",
-                                            "position",[edit_text_x_pos 270 edit_text_width 40]); 
-  listbox_horizontal_support                      = uicontrol(f,
-                                            "style", "listbox",
-                                            "string", {"Pinned", "Fixed", "Roller"},
-                                            "position", [edit_text2_x_pos 270 add_button_width 40]
-                                            )
-  button_add_horizontal_support = uicontrol (f,
-                                            "string", "+",
-                                            "callback", {@getSupports, edit_horizontal_support, listbox_horizontal_support},
-                                            "position", [add_button_x_position 270 add_button_width 40]);
+            % Beam
+            text_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "Beam width [m]: ",
+                "position",
+                [left_margin 100 text_width 40],
+                "enable",
+                "inactive"
+            );
 
-  button_save = uicontrol (f,
-                           "string",
-                           "Save Input",
-                           "callback", @finish,
-                           "position",[left_margin 55 button_width component_height]);
+            edit_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text_x_pos 100 edit_text_width 40]
+            );
 
-  button_solve = uicontrol (f, "string", "Solve", "position",[left_margin + button_width 55 button_width component_height]);
-  b1 = uicontrol (f, "string", "Load Config", "position",[left_margin 370 button_width component_height]);
+            text_view_beam = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 100 view_width component_height]
+            );
+
+            button_add_beam = uicontrol(
+                obj.f,
+                "string",
+                "+",
+                "callback",
+                {@getBeamWidth, edit_beam_width, text_view_beam}, 
+                "position",
+                [add_button_x_position 100 add_button_width 40]
+            );
+
+            % Vertical forces
+            text_vertical_forces = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "Vertical force [N]: ",
+                "position",
+                [left_margin 140 text_width 40],
+                "enable",
+                "inactive"
+            );
+
+            edit_vertical_f_position = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text_x_pos 140 edit_text_width 40]
+            );
+
+            edit_vertical_f_mag = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text2_x_pos 140 edit_text_width 40]
+            );
+
+            text_view_vertical_forces = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 140 view_width component_height]
+            );
+
+            button_add_vertical_forces = uicontrol(
+                obj.f,
+                "string",
+                "+",
+                "callback",
+                {@getVerticalForces, edit_vertical_f_position, edit_vertical_f_mag, text_view_vertical_forces},
+                "position",
+                [add_button_x_position 140 add_button_width 40]
+            );
+
+            % Horizontal forces
+            text_horizontal_forces = uicontrol(
+                obj.f,
+                "style", "edit",
+                "string",
+                "Horizontal force [N]: ",
+                "position",
+                [left_margin 180 text_width 40],
+                "enable",
+                "inactive"
+            );
+
+            edit_horizontal_f_position = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text_x_pos 180 edit_text_width 40]
+            );
+            
+            edit_horizontal_f_mag = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text2_x_pos 180 edit_text_width 40]
+            );
+
+            text_view_horizontal_forces = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 180 view_width component_height]
+            );
+
+            button_add_horizontal_forces  = uicontrol(
+                obj.f,
+                "string",
+                "+",
+                "callback",
+                {@getHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag, text_view_horizontal_forces},
+                "position",
+                [add_button_x_position 180 add_button_width 40]
+            );
+
+            % Torque
+            text_torques = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "Torque [Nm]: ",
+                "position",
+                [left_margin 220 text_width 40],
+                "enable",
+                "inactive"
+            );
+
+            edit_torque = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text_x_pos 220 edit_text_width 40]
+            );
+
+            text_view_torques = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 220 view_width component_height]
+            );
+
+            button_add_torques = uicontrol(
+                obj.f,
+                "string",
+                "+",
+                "callback",
+                {@getTorques, edit_torque, text_view_torques},
+                "position",
+                [add_button_x_position 220 add_button_width 40]
+            );
+
+            % Suport
+            text_horizontal_support = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "Horizontal support x position [m]: ",
+                "position",
+                [left_margin 270 text_width add_button_height],
+                "enable",
+                "inactive"
+            ); 
+
+            edit_horizontal_support = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [edit_text_x_pos 270 edit_text_width add_button_height]
+            ); 
+
+            listbox_horizontal_support = uicontrol(
+                obj.f,
+                "style",
+                "listbox",
+                "string",
+                {"Pinned", "Fixed", "Roller"},
+                "position",
+                [edit_text2_x_pos 270 add_button_width add_button_height]
+            );
+
+            text_view_horizontal_support = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 270 view_width component_height]
+            );
+
+            button_add_horizontal_support = uicontrol(
+                obj.f,
+                "string",
+                "+",
+                "callback",
+                {@getSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3), text_view_horizontal_support},
+                "position",
+                [add_button_x_position 270 add_button_width 40]
+            );
+
+            % Button
+            button_save = uicontrol(
+                obj.f,
+                "string",
+                "Save Input",
+                "position",
+                [left_margin 55 button_width component_height]
+            );
+
+            button_solve = uicontrol (
+                obj.f,
+                "string",
+                "Solve",
+                "callback",
+                {@solve_gui},
+                "position",
+                [left_margin + button_width 55 button_width component_height]
+            );
+
+            b1 = uicontrol (
+                obj.f,
+                "string",
+                "Load Config",
+                "position",
+                [left_margin 370 button_width component_height]
+            );
+
+            waitfor(obj.f)
+        end
+    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Callbacks                                                              %
+% Callbacks                                                              % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function getBeamWidth(hObject, eventdata, edit)
-  global data_beam_width;
-  data_beam_width = str2double(get(edit, 'String'))
-  set(edit, 'String', "");
+function getBeamWidth(hObject, eventdata, edit, view)
+    global obj
+
+    obj.data_beam_width = str2double(get(edit, 'String'));
+
+    set(view, 'String', mat2str(obj.data_beam_width, [4, 2]));
+    set(edit, 'String', "");
 end
 
-function getVerticalForces(hObject, eventdata, edit_pos, edit_mag)
-  global data_vertical_forces
-  position = str2double(get(edit_pos, 'String'))
-  mag = str2double(get(edit_mag, 'String'))
-  if (length(data_vertical_forces) == 0)
-    data_vertical_forces = Force(0,0)
-  end
-  data_vertical_forces(length(data_vertical_forces) + 1) = Force(position, mag)
-  set(edit_pos, 'String', "");
-  set(edit_mag, 'String', "");
+
+function getVerticalForces(hObject, eventdata, edit_pos, edit_mag, view)
+    global obj
+
+    position = str2double(get(edit_pos, 'String'));
+    mag = str2double(get(edit_mag, 'String'));
+
+    obj.data_vertical_forces(length(obj.data_vertical_forces) + 1) = Force(position, mag);
+
+    set(view, 'String', getTextFromForces(obj.data_vertical_forces));
+    set(edit_pos, 'String', "");
+    set(edit_mag, 'String', "");
+end
+  
+
+function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag, view)
+    global obj 
+
+    position = str2double(get(edit_pos, 'String'));
+    mag = str2double(get(edit_mag, 'String'));
+
+    obj.data_horizontal_forces(length(obj.data_horizontal_forces) + 1) = Force(position, mag);
+
+    set(view, 'String', getTextFromForces(obj.data_horizontal_forces));
+    set(edit_pos, 'String', "");
+    set(edit_mag, 'String', "");
 end
 
-function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag)
-  global data_horizontal_forces
-  position = str2double(get(edit_pos, 'String'))
-  edit_mag
-  mag = str2double(get(edit_mag, 'String'))
-  if (length(data_horizontal_forces) == 0)
-    data_horizontal_forces = Force(0,0)
-  end
-  data_horizontal_forces(length(data_horizontal_forces) + 1) = Force(position, mag)
-  set(edit_pos, 'String', "");
-  set(edit_mag, 'String', "");
+function text = getTextFromForces(data_forces)
+    text = "";
+    for i = 2:length(data_forces)
+        text = strcat(text, "[pos: ", num2str(data_forces(i).pos), "m ; mag :",  num2str(data_forces(i).mag), "N ] ");
+    end
 end
 
-function getTorques(hObject, eventdata, edit)
-  global data_torques;
-  mag = str2double(get(edit, 'String'));
-  if (length(data_torques) == 0)
-    data_torques = Force(0,0)
-  end
-  data_torques(length(data_torques) + 1) = Force(0, mag)
-  set(edit, 'String', "");
+function getTorques(hObject, eventdata, edit, view)
+    global obj 
+
+    mag = str2double(get(edit, 'String'));
+    
+    obj.data_torques(length(obj.data_torques) + 1) = Force(0, mag);
+
+    set(view, 'String', getTextFromTorques(obj.data_torques));
+    set(edit, 'String', "");
 end
 
-function getSupports(hObject, eventdata, edit, listbox)
-  global data_supports;
-  selection = get(listbox, 'String');
-  support_type_str = get(listbox, 'String')
-  support_type = SupportType().Dummy
-  switch (support_type_str)
-    case "Pinned"
-      support_type = SupportType().Pinned
-    case "Fixed"
-      support_type = SupportType().Fixed
-    case "Roller"
-      support_type = SupportType().Roller
-  end
-
-  position = str2double(get(edit, 'String'))
-  if (length(data_supports) == 0)
-    data_supports = Support(0, SupportType().Dummy)
-  end
-  data_supports(length(data_supports) + 1) = Support(position, support_type)
-  set(edit, 'String', "");
+function text = getTextFromTorques(data_torques)
+    text = "";
+    for i = 2:length(data_torques)
+        text = strcat(text, "[mag: ",  num2str(data_torques(i).mag), "Nm ] ");
+    end
 end
+
+function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
+    global obj 
+
+    selection = get(listbox, 'String');
+    support_type_str = get(listbox, 'Value');
+
+    support_type = SupportType().Dummy;
+
+    switch (support_type_str)
+        case listboxID.Pinned
+            support_type = SupportType().Pinned;
+        case listboxID.Fixed
+            support_type = SupportType().Fixed;
+        case listboxID.Roller
+            support_type = SupportType().Roller;
+    end
+
+    if support_type != SupportType().Dummy
+        position = str2double(get(edit, 'String'))
+
+        obj.data_supports(length(obj.data_supports) + 1) = Support(position, support_type);
+    end
+
+    text = "";
+    options = ["Pinned"; "Fixed"; "Roller"];
+    for i = 2:length(obj.data_supports)
+        text = strcat(text, "[", num2str(obj.data_supports(i).pos),  ";" , options(support_type_str), "] ");
+    end
+
+    set(view, 'String', text);
+    set(edit, 'String', "");
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function finish(hObject, eventdata)
-  global data_beam_width
-  global data_vertical_forces
-  global data_horizontal_forces
-  global data_torques
-  global data_vertical_dist_forces
-  global data_supports
-  % TODO read this from the real component
-  data_vertical_dist_forces = DistForce(0, 0, @(x)(0), @(x)(0)) 
-  [v_forces, h_forces, t_forces, m_forces] = lib_resmat.res_mat_1d_solver(
-    data_beam_width,
-    data_vertical_forces,
-    data_horizontal_forces,
-    data_torques,
-    data_vertical_dist_forces,
-    data_supports
-);
+function solve_gui(hObject, eventdata)
+    global obj
 
-output_file(v_forces, h_forces, t_forces, m_forces)
+    printf("**************************************************\n")
+
+    [v_forces, h_forces, t_forces, m_forces] = lib_resmat.res_mat_1d_solver(
+        obj.data_beam_width,
+        obj.data_vertical_forces,
+        obj.data_horizontal_forces,
+        obj.data_torques,
+        obj.data_vertical_dist_forces,
+        obj.data_supports
+    );
+
+    output_file(v_forces, h_forces, t_forces, m_forces);
+ 
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Program                                                                %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-close all
-clear h
-UI()
