@@ -1,5 +1,3 @@
-
-
 classdef UI
     properties
         f;
@@ -51,12 +49,11 @@ classdef UI
             edit_text_width = 70;
             edit_text2_x_pos = edit_text_x_pos + edit_text_width;
             add_button_x_position = edit_text2_x_pos + edit_text_width;
-            
             add_button_width = 70;
             add_button_height = 80;
-
             button_width = 100;
-
+            view_position = add_button_x_position + add_button_width;
+            view_width = 300;
             % Label
             text_position_label = uicontrol(
                 obj.f,
@@ -105,12 +102,22 @@ classdef UI
                 [edit_text_x_pos 100 edit_text_width 40]
             );
 
+            text_view_beam = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 100 view_width component_height]
+            );
+
             button_add_beam = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getBeamWidth, edit_beam_width}, 
+                {@getBeamWidth, edit_beam_width, text_view_beam}, 
                 "position",
                 [add_button_x_position 100 add_button_width 40]
             );
@@ -148,12 +155,22 @@ classdef UI
                 [edit_text2_x_pos 140 edit_text_width 40]
             );
 
+            text_view_vertical_forces = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 140 view_width component_height]
+            );
+
             button_add_vertical_forces = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getVerticalForces, edit_vertical_f_position, edit_vertical_f_mag},
+                {@getVerticalForces, edit_vertical_f_position, edit_vertical_f_mag, text_view_vertical_forces},
                 "position",
                 [add_button_x_position 140 add_button_width 40]
             );
@@ -190,12 +207,22 @@ classdef UI
                 [edit_text2_x_pos 180 edit_text_width 40]
             );
 
+            text_view_horizontal_forces = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 180 view_width component_height]
+            );
+
             button_add_horizontal_forces  = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag},
+                {@getHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag, text_view_horizontal_forces},
                 "position",
                 [add_button_x_position 180 add_button_width 40]
             );
@@ -223,12 +250,22 @@ classdef UI
                 [edit_text_x_pos 220 edit_text_width 40]
             );
 
+            text_view_torques = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 220 view_width component_height]
+            );
+
             button_add_torques = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getTorques, edit_torque},
+                {@getTorques, edit_torque, text_view_torques},
                 "position",
                 [add_button_x_position 220 add_button_width 40]
             );
@@ -266,22 +303,31 @@ classdef UI
                 [edit_text2_x_pos 270 add_button_width add_button_height]
             );
 
+            text_view_horizontal_support = uicontrol(
+              obj.f,
+              "style",
+              "text",
+              "string",
+              "",
+              "position",
+              [view_position 270 view_width component_height]
+            );
+
             button_add_horizontal_support = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3)},
+                {@getSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3), text_view_horizontal_support},
                 "position",
                 [add_button_x_position 270 add_button_width 40]
             );
 
+            % Button
             button_save = uicontrol(
                 obj.f,
                 "string",
                 "Save Input",
-                "callback",
-                {@solve_gui},
                 "position",
                 [left_margin 55 button_width component_height]
             );
@@ -290,6 +336,8 @@ classdef UI
                 obj.f,
                 "string",
                 "Solve",
+                "callback",
+                {@solve_gui},
                 "position",
                 [left_margin + button_width 55 button_width component_height]
             );
@@ -307,17 +355,20 @@ classdef UI
     end
 end
 
-
-function getBeamWidth(hObject, eventdata, edit)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Callbacks                                                              % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function getBeamWidth(hObject, eventdata, edit, view)
     global obj
 
     obj.data_beam_width = str2double(get(edit, 'String'));
-    
+
+    set(view, 'String', mat2str(obj.data_beam_width, [4, 2]));
     set(edit, 'String', "");
 end
 
 
-function getVerticalForces(hObject, eventdata, edit_pos, edit_mag)
+function getVerticalForces(hObject, eventdata, edit_pos, edit_mag, view)
     global obj
 
     position = str2double(get(edit_pos, 'String'));
@@ -325,12 +376,13 @@ function getVerticalForces(hObject, eventdata, edit_pos, edit_mag)
 
     obj.data_vertical_forces(length(obj.data_vertical_forces) + 1) = Force(position, mag);
 
+    set(view, 'String', getTextFromForces(obj.data_vertical_forces));
     set(edit_pos, 'String', "");
     set(edit_mag, 'String', "");
 end
   
 
-function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag)
+function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag, view)
     global obj 
 
     position = str2double(get(edit_pos, 'String'));
@@ -338,21 +390,37 @@ function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag)
 
     obj.data_horizontal_forces(length(obj.data_horizontal_forces) + 1) = Force(position, mag);
 
+    set(view, 'String', getTextFromForces(obj.data_horizontal_forces));
     set(edit_pos, 'String', "");
     set(edit_mag, 'String', "");
 end
 
-function getTorques(hObject, eventdata, edit)
+function text = getTextFromForces(data_forces)
+    text = "";
+    for i = 2:length(data_forces)
+        text = strcat(text, "[pos: ", num2str(data_forces(i).pos), "m ; mag :",  num2str(data_forces(i).mag), "N ] ");
+    end
+end
+
+function getTorques(hObject, eventdata, edit, view)
     global obj 
 
     mag = str2double(get(edit, 'String'));
     
     obj.data_torques(length(obj.data_torques) + 1) = Force(0, mag);
 
+    set(view, 'String', getTextFromTorques(obj.data_torques));
     set(edit, 'String', "");
 end
 
-function getSupports(hObject, eventdata, edit, listbox, listboxID)
+function text = getTextFromTorques(data_torques)
+    text = "";
+    for i = 2:length(data_torques)
+        text = strcat(text, "[mag: ",  num2str(data_torques(i).mag), "Nm ] ");
+    end
+end
+
+function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
     global obj 
 
     selection = get(listbox, 'String');
@@ -374,8 +442,15 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID)
 
         obj.data_supports(length(obj.data_supports) + 1) = Support(position, support_type);
     end
-        
-    set(edit, 'String', "");    
+
+    text = "";
+    options = ["Pinned"; "Fixed"; "Roller"];
+    for i = 2:length(obj.data_supports)
+        text = strcat(text, "[", num2str(obj.data_supports(i).pos),  ";" , options(support_type_str), "] ");
+    end
+
+    set(view, 'String', text);
+    set(edit, 'String', "");
 end
 
 
