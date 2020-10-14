@@ -424,8 +424,6 @@ function solve_problem(obj)
 
     plot(x_pos, v_inner_forces, 'o');
 
-    plot(x_pos, v_inner_forces, 'o');
-
     ax2 = subplot(2, 1, 2);
 
     plot(x_pos, m_inner_forces, 'o');

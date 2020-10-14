@@ -50,7 +50,7 @@ classdef    lib_resmat
                         min(dist_force.pos_end, beam_width)
                     ) / result_force_int;
 
-                    resultant_force = Force(centroid, result_force);
+                    resultant_force = Force(centroid, result_force_int);
                     
                     sum_vertical_forces = sum_vertical_forces + resultant_force.mag;
 
