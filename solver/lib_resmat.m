@@ -1,6 +1,6 @@
 classdef    lib_resmat 
     methods ( Static = true )
-        function [v_forces, h_forces, t_forces, m_forces] = res_mat_1d_solver(
+        function [v_forces, h_forces, t_forces, m_forces, v_dist_forces] = res_mat_1d_solver(
                 beam_width,
                 vertical_forces,
                 horizontal_forces,
@@ -20,6 +20,12 @@ classdef    lib_resmat
                 
                 return
             end
+
+            t_forces = torques;
+            m_forces(1) = Force(0, 0);
+            v_dist_forces(1) = Force(0, 0);
+            v_forces = vertical_forces;
+            h_forces = horizontal_forces;
         
             % Converts the distributed forces to punctual forces
             for i = 2:length(vertical_dist_forces)
@@ -32,13 +38,9 @@ classdef    lib_resmat
                 centroid = quadcc(@(x) (dist_force.dist_func_times_x(x) + 0 * x), dist_force.pos_beg, dist_force.pos_end) / result_force;
                 
                 % add the punctual forces to the end of the vertical forces vector
+                v_dist_forces(length(v_dist_forces) + 1) = Force(centroid, result_force);
                 vertical_forces(length(vertical_forces) + 1) = Force(centroid, result_force);
             end
-
-            t_forces = torques;
-            m_forces(1) = Force(0, 0);
-            v_forces = vertical_forces;
-            h_forces = horizontal_forces;
         
             % calculates the resultant vertical and horizontal forces, as well the resultant torques
             sum_torque_forces = 0;
