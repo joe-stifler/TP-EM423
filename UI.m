@@ -7,6 +7,7 @@ classdef UI
         data_horizontal_forces;
         data_supports;
         data_vertical_dist_forces;
+        data_num_steps;
     end
 
     methods
@@ -15,7 +16,7 @@ classdef UI
 
             addpath('./datatypes');
             addpath('./solver');
-            
+
             % Load my data
             beam_width = 0;
             torques(1) = Force(0, 0);
@@ -29,6 +30,7 @@ classdef UI
                 run(args{1});
             end
 
+            obj.data_num_steps = 100;
             obj.data_beam_width = beam_width;
             obj.data_torques = torques;
             obj.data_horizontal_forces = horizontal_forces;
@@ -395,7 +397,7 @@ end
 function solve_problem(obj)
     printf("**************************************************\n")
 
-    [v_forces, h_forces, t_forces, m_forces, v_dist_forces] = lib_resmat.res_mat_1d_solver(
+    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = lib_resmat.res_mat_1d_solver(
         obj.data_beam_width,
         obj.data_vertical_forces,
         obj.data_horizontal_forces,
@@ -405,6 +407,30 @@ function solve_problem(obj)
     );
 
     output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
+
+    [x_pos, v_inner_forces, m_inner_forces] = lib_resmat.res_mat_1d_inner_solver(
+        obj.data_beam_width,
+        v_forces,
+        h_forces,
+        t_forces,
+        m_forces,
+        obj.data_vertical_dist_forces,
+        obj.data_num_steps
+    );
+
+    fig = figure();
+
+    ax1 = subplot (2, 1, 1);
+
+    plot(x_pos, v_inner_forces, 'o');
+
+    plot(x_pos, v_inner_forces, 'o');
+
+    ax2 = subplot(2, 1, 2);
+
+    plot(x_pos, m_inner_forces, 'o');
+
+    waitfor(fig)
 end
 
 function ret = output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces)

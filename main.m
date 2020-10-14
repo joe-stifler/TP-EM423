@@ -9,9 +9,3 @@ if length(args) == 0
 else
     obj.solve()
 end
-
-
-
-
-
-

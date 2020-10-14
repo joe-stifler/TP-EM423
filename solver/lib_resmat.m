@@ -1,6 +1,6 @@
 classdef    lib_resmat 
     methods ( Static = true )
-        function [v_forces, h_forces, t_forces, m_forces, v_dist_forces] = res_mat_1d_solver(
+        function [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = res_mat_1d_solver(
                 beam_width,
                 vertical_forces,
                 horizontal_forces,
@@ -8,40 +8,13 @@ classdef    lib_resmat
                 vertical_dist_forces,
                 supports
             )
-        
-            % if there is no support present, then there is nothing to do
-            if length(supports) == 1
-                t_forces = Force(0, 0);
-                m_forces(1) = Force(0, 0);
-                v_forces = Force(0, 0);
-                h_forces = Force(0, 0);
-
-                printf("No support specified! Returning from function without solving the problem.")
-                
-                return
-            end
 
             t_forces = torques;
+            v_forces = Force(0, 0);
             m_forces(1) = Force(0, 0);
-            v_dist_forces(1) = Force(0, 0);
-            v_forces = vertical_forces;
             h_forces = horizontal_forces;
-        
-            % Converts the distributed forces to punctual forces
-            for i = 2:length(vertical_dist_forces)
-                dist_force = vertical_dist_forces(i);
-                
-                % calculates the resultant force (integrates from `beg` to `end`)
-                result_force = quadcc(@(x) (dist_force.dist_func(x) + 0 * x), dist_force.pos_beg, dist_force.pos_end);
-        
-                % calculates the centroid of the force (integrates from `beg` to `end`)
-                centroid = quadcc(@(x) (dist_force.dist_func_times_x(x) + 0 * x), dist_force.pos_beg, dist_force.pos_end) / result_force;
-                
-                % add the punctual forces to the end of the vertical forces vector
-                v_dist_forces(length(v_dist_forces) + 1) = Force(centroid, result_force);
-                vertical_forces(length(vertical_forces) + 1) = Force(centroid, result_force);
-            end
-        
+            v_dist_forces(1) = Force(0, 0);
+
             % calculates the resultant vertical and horizontal forces, as well the resultant torques
             sum_torque_forces = 0;
             sum_vertical_forces = 0;
@@ -52,20 +25,56 @@ classdef    lib_resmat
             for i = 2:length(torques)
                 sum_torque_forces = sum_torque_forces + torques(i).mag;
             end
+
+            % resultant horizontal forces
+            for i = 2:length(horizontal_forces)
+                sum_horizontal_forces = sum_horizontal_forces + horizontal_forces(i).mag;
+            end
+
+            % Converts the distributed forces to punctual forces
+            for i = 2:length(vertical_dist_forces)
+                dist_force = vertical_dist_forces(i);
+
+                if dist_force.pos_beg <= beam_width
+                    % calculates the resultant force (integrates from `beg` to `end`)
+                    result_force_int = quadcc(
+                        @(x) (dist_force.dist_func(x) + 0 * x),
+                        dist_force.pos_beg,
+                        min(dist_force.pos_end, beam_width)
+                    );
+            
+                    % calculates the centroid of the force (integrates from `beg` to `end`)
+                    centroid = quadcc(
+                        @(x) (dist_force.dist_func_times_x(x) + 0 * x),
+                        dist_force.pos_beg,
+                        min(dist_force.pos_end, beam_width)
+                    ) / result_force_int;
+
+                    resultant_force = Force(centroid, result_force);
+                    
+                    sum_vertical_forces = sum_vertical_forces + resultant_force.mag;
+
+                    sum_momentums_forces = sum_momentums_forces + (0 - resultant_force.pos) * resultant_force.mag;
+
+                    % add the punctual forces to the end of the vertical forces vector
+                    v_dist_forces(length(v_dist_forces) + 1) = resultant_force;
+
+                    m_forces(length(m_forces) + 1) = Force(resultant_force.pos, (0 - resultant_force.pos) * resultant_force.mag);
+                end
+            end
         
             % resultant vertical forces
             for i = 2:length(vertical_forces)
                 force = vertical_forces(i);
-        
-                sum_vertical_forces = sum_vertical_forces + force.mag;
-                sum_momentums_forces = sum_momentums_forces + (beam_width - force.pos) * force.mag;
 
-                m_forces(length(m_forces) + 1) = Force(force.pos, (beam_width - force.pos) * force.mag);
-            end
-        
-            % resultant horizontal forces
-            for i = 2:length(horizontal_forces)
-                sum_horizontal_forces = sum_horizontal_forces + horizontal_forces(i).mag;
+                if force.pos <= beam_width
+                    v_forces(length(v_forces) + 1) = force;
+
+                    sum_vertical_forces = sum_vertical_forces + force.mag;
+                    sum_momentums_forces = sum_momentums_forces + (0 - force.pos) * force.mag;
+
+                    m_forces(length(m_forces) + 1) = Force(force.pos, (0 - force.pos) * force.mag);
+                end
             end
         
             B = [
@@ -116,11 +125,11 @@ classdef    lib_resmat
                         if loopIdx == 1
                             % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
-                            A(4, num_incognitas + 1) = beam_width - _support.pos;
+                            A(4, num_incognitas + 1) = 0 - _support.pos;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
-                            m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
+                            m_forces(length(m_forces) + 1) = Force(_support.pos, (0 - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
@@ -161,11 +170,11 @@ classdef    lib_resmat
                         if loopIdx == 1
                             % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
-                            A(4, num_incognitas + 1) = beam_width - _support.pos;
+                            A(4, num_incognitas + 1) = 0 - _support.pos;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
-                            m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
+                            m_forces(length(m_forces) + 1) = Force(_support.pos, (0 - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
@@ -206,11 +215,11 @@ classdef    lib_resmat
                         if loopIdx == 1
                             % We construct the coefficient matrix for the vertical (and its momentum) incognita column
                             A(1, num_incognitas + 1) = 1;
-                            A(4, num_incognitas + 1) = beam_width - _support.pos;
+                            A(4, num_incognitas + 1) = 0 - _support.pos;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
                             v_forces(length(v_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
-                            m_forces(length(m_forces) + 1) = Force(_support.pos, (beam_width - _support.pos) * X(num_incognitas + 1));
+                            m_forces(length(m_forces) + 1) = Force(_support.pos, (0 - _support.pos) * X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
@@ -234,5 +243,45 @@ classdef    lib_resmat
             end
         end
     
+        function [x_pos, v_inner_forces, m_inner_forces] = res_mat_1d_inner_solver(
+                beam_width,
+                vertical_forces,
+                horizontal_forces,
+                torques,
+                momentums,
+                vertical_dist_forces,
+                num_steps
+            )
+
+            x_pos = 0;
+            v_inner_forces = 0;
+            m_inner_forces = 0;
+
+            if num_steps > 0
+                x_pos = [0 : beam_width / num_steps : beam_width];
+
+                v_inner_forces = zeros(1, length(x_pos));
+                m_inner_forces = zeros(1, length(x_pos));
+
+                for i = 1:length(x_pos)
+                    x = x_pos(i);
+
+                    supports(1) = Support(0, SupportType().Dummy);
+                    supports(2) = Support(x, SupportType().Fixed);
+
+                    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = lib_resmat.res_mat_1d_solver(
+                        x,
+                        vertical_forces,
+                        horizontal_forces,
+                        torques,
+                        vertical_dist_forces,
+                        supports
+                    );
+
+                    v_inner_forces(1, i) = -X(3);
+                    m_inner_forces(1, i) = -X(4);
+                end
+            end
+        end
     end
 end
