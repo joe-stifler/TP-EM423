@@ -363,16 +363,6 @@ classdef UI
                 [edit_text2_x_pos 490 button_width component_height]
             );
 
-            text_dist_force_degree = uicontrol (
-                obj.f,
-                "style",
-                "text",
-                "string",
-                "Degree",
-                "position",
-                [edit_text2_x_pos + button_width 490 button_width component_height]
-            );
-
             text_dist_force_coeficients = uicontrol (
                 obj.f,
                 "style",
@@ -380,11 +370,11 @@ classdef UI
                 "string",
                 "Polynomial Coefficients",
                 "position",
-                [edit_text2_x_pos + 2*button_width 490 view_width component_height]
+                [edit_text2_x_pos + button_width 490 view_width component_height]
             );            
             
             % Dist forces input
-            text_horizontal_support = uicontrol(
+            text_dist_force_description = uicontrol(
                 obj.f,
                 "style",
                 "text",
@@ -410,32 +400,49 @@ classdef UI
                 [edit_text2_x_pos 450 button_width component_height]
             );
 
-            edit_dist_force_degree = uicontrol (
-                obj.f,
-                "style",
-                "edit",
-                "position",
-                [edit_text2_x_pos + button_width 450 button_width component_height]
-            );
-
             edit_dist_force_coeficients = uicontrol (
                 obj.f,
                 "style",
                 "edit",
                 "position",
-                [edit_text2_x_pos + 2*button_width 450 view_width component_height]
+                [edit_text2_x_pos + button_width 450 view_width component_height]
+            );
+
+            % Dist forces view
+            view_dist_force_begin = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "position",
+                [edit_text_x_pos 410 button_width component_height]
+            );
+
+            view_dist_force_end = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "position",
+                [edit_text2_x_pos 410 button_width component_height]
+            );
+
+            view_dist_force_coeficients = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "position",
+                [edit_text2_x_pos + button_width 410 view_width component_height]
             );
 
             % Dist forces add button
-            button_add_torques = uicontrol(
+            button_add_dist_force = uicontrol(
                 obj.f,
                 "string",
                 "+",
                 "callback",
-                {@getDistForces, edit_dist_force_begin, edit_dist_force_end, edit_dist_force_degree, edit_dist_force_coeficients},
+                {@getDistForces, edit_dist_force_begin, edit_dist_force_end, edit_dist_force_coeficients, view_dist_force_begin, view_dist_force_end, view_dist_force_coeficients},
                 "position",
-                [edit_text2_x_pos + 2*button_width + view_width 450 add_button_width 40]
-            );             
+                [edit_text2_x_pos + button_width + view_width 450 add_button_width 40]
+            );
 
             waitfor(obj.f)
         end
@@ -541,9 +548,31 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
 end
 
 
-function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_degree, edit_coef)
+function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view_begin, view_end, view_coef)
+    get(edit_begin, 'String')
+    begin_pos = str2double(get(edit_begin, 'String'))
+    end_pos = str2double(get(edit_end, 'String'))
+    fun_str = get(edit_coef, 'String')
+    fun = inline(fun_str)
 
+    h = guidata(hObject)
+    addTextViewText(view_begin, num2str(begin_pos))
+    addTextViewText(view_end, num2str(end_pos))
+    addTextViewText(view_coef, fun_str)
+
+    set(edit_begin, 'String', '')
+    set(edit_end, 'String', '')
+    set(edit_coef, 'String', '')
 end
+
+function addTextViewText(view, text)
+    old_text  = get(view, 'String')
+    set(view, 'String', strcat(old_text, "[", text, "]"))
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Auxiliary function to treat input                                      % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
