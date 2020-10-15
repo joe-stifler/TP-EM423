@@ -549,16 +549,20 @@ end
 
 
 function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view_begin, view_end, view_coef)
-    get(edit_begin, 'String')
-    begin_pos = str2double(get(edit_begin, 'String'))
-    end_pos = str2double(get(edit_end, 'String'))
-    fun_str = get(edit_coef, 'String')
-    fun = inline(fun_str)
+    get(edit_begin, 'String');
+    begin_pos = str2double(get(edit_begin, 'String'));
+    end_pos = str2double(get(edit_end, 'String'));
+    fun_str = get(edit_coef, 'String');
+    fun = inline(fun_str);
 
-    h = guidata(hObject)
-    addTextViewText(view_begin, num2str(begin_pos))
-    addTextViewText(view_end, num2str(end_pos))
-    addTextViewText(view_coef, fun_str)
+    addTextViewText(view_begin, num2str(begin_pos));
+    addTextViewText(view_end, num2str(end_pos));
+    addTextViewText(view_coef, fun_str);
+
+    global obj
+    new_dist_force = DistForce(begin_pos, end_pos, fun, @(x) x*fun(x))
+    disp('Hi there')
+    obj.data_vertical_dist_forces(length(obj.data_vertical_dist_forces) + 1) = new_dist_force
 
     set(edit_begin, 'String', '')
     set(edit_end, 'String', '')
@@ -566,13 +570,9 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
 end
 
 function addTextViewText(view, text)
-    old_text  = get(view, 'String')
-    set(view, 'String', strcat(old_text, "[", text, "]"))
+    old_text  = get(view, 'String');
+    set(view, 'String', strcat(old_text, "[", text, "]"));
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Auxiliary function to treat input                                      % 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
