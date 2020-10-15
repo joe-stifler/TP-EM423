@@ -45,10 +45,10 @@ classdef UI
             component_height = 40;
             left_margin = 10;
             text_width = 240;
-            edit_text_x_pos = left_margin + text_width;
+            edit_text_x_pos = 250;
             edit_text_width = 70;
-            edit_text2_x_pos = edit_text_x_pos + edit_text_width;
-            add_button_x_position = edit_text2_x_pos + edit_text_width;
+            edit_text2_x_pos =  320;
+            add_button_x_position = 390;
             add_button_width = 70;
             add_button_height = 80;
             button_width = 100;
@@ -342,13 +342,100 @@ classdef UI
                 [left_margin + button_width 55 button_width component_height]
             );
 
-            b1 = uicontrol (
+            % Dist forces labels
+            text_dist_force_begin_label = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Start [m]",
+                "position",
+                [edit_text_x_pos 490 button_width component_height]
+            );
+
+            text_dist_force_end_label = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "End [m]",
+                "position",
+                [edit_text2_x_pos 490 button_width component_height]
+            );
+
+            text_dist_force_degree = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Degree",
+                "position",
+                [edit_text2_x_pos + button_width 490 button_width component_height]
+            );
+
+            text_dist_force_coeficients = uicontrol (
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Polynomial Coefficients",
+                "position",
+                [edit_text2_x_pos + 2*button_width 490 view_width component_height]
+            );            
+            
+            % Dist forces input
+            text_horizontal_support = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Distribuited forces: ",
+                "position",
+                [left_margin 450 text_width add_button_height]
+            ); 
+
+            edit_dist_force_begin = uicontrol (
+                obj.f,
+                "style",
+                "edit",
+                "position",
+                [edit_text_x_pos 450 button_width component_height]
+            );
+
+            edit_dist_force_end = uicontrol (
+                obj.f,
+                "style",
+                "edit",
+                "position",
+                [edit_text2_x_pos 450 button_width component_height]
+            );
+
+            edit_dist_force_degree = uicontrol (
+                obj.f,
+                "style",
+                "edit",
+                "position",
+                [edit_text2_x_pos + button_width 450 button_width component_height]
+            );
+
+            edit_dist_force_coeficients = uicontrol (
+                obj.f,
+                "style",
+                "edit",
+                "position",
+                [edit_text2_x_pos + 2*button_width 450 view_width component_height]
+            );
+
+            % Dist forces add button
+            button_add_torques = uicontrol(
                 obj.f,
                 "string",
-                "Load Config",
+                "+",
+                "callback",
+                {@getDistForces, edit_dist_force_begin, edit_dist_force_end, edit_dist_force_degree, edit_dist_force_coeficients},
                 "position",
-                [left_margin 370 button_width component_height]
-            );
+                [edit_text2_x_pos + 2*button_width + view_width 450 add_button_width 40]
+            );             
 
             waitfor(obj.f)
         end
@@ -453,6 +540,10 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
     set(edit, 'String', "");
 end
 
+
+function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_degree, edit_coef)
+
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
