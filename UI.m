@@ -7,13 +7,15 @@ classdef UI
         data_horizontal_forces;
         data_supports;
         data_vertical_dist_forces;
+        data_num_steps;
     end
 
     methods
-        function obj = UI()
-            addpath('datatypes');
-            addpath('solver');
-            addpath('tests');
+        function obj = UI(args)
+            warning('off','all');
+
+            addpath('./datatypes');
+            addpath('./solver');
 
             % Load my data
             beam_width = 0;
@@ -24,14 +26,21 @@ classdef UI
             vertical_dist_forces(1) = DistForce(0, 0, @(x)(0), @(x)(0));
 
             % Add the input file here
-            % aula1_ex1;
+            if length(args) > 0
+                run(args{1});
+            end
 
+            obj.data_num_steps = 100;
             obj.data_beam_width = beam_width;
             obj.data_torques = torques;
             obj.data_horizontal_forces = horizontal_forces;
             obj.data_vertical_forces = vertical_forces;
             obj.data_supports = supports;
             obj.data_vertical_dist_forces = vertical_dist_forces;
+        end
+
+        function solve(obj)
+            solve_problem(obj)
         end
 
         function build(obj)
@@ -547,6 +556,7 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
     set(edit, 'String', "");
 end
 
+<<<<<<< HEAD
 
 function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view_begin, view_end, view_coef)
     get(edit_begin, 'String');
@@ -574,15 +584,21 @@ function addTextViewText(view, text)
     set(view, 'String', strcat(old_text, "[", text, "]"));
 end
 
+=======
+>>>>>>> 83c61f189100195ce52c2548fa45a4338db6b350
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function solve_gui(hObject, eventdata)
     global obj
 
+    solve_problem(obj)
+end
+
+function solve_problem(obj)
     printf("**************************************************\n")
 
-    [v_forces, h_forces, t_forces, m_forces] = lib_resmat.res_mat_1d_solver(
+    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = lib_resmat.res_mat_1d_solver(
         obj.data_beam_width,
         obj.data_vertical_forces,
         obj.data_horizontal_forces,
@@ -591,6 +607,68 @@ function solve_gui(hObject, eventdata)
         obj.data_supports
     );
 
-    output_file(v_forces, h_forces, t_forces, m_forces);
- 
+    output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
+
+    [x_pos, v_inner_forces, m_inner_forces] = lib_resmat.res_mat_1d_inner_solver(
+        obj.data_beam_width,
+        v_forces,
+        h_forces,
+        t_forces,
+        m_forces,
+        obj.data_vertical_dist_forces,
+        obj.data_num_steps
+    );
+
+    fig = figure();
+
+    ax1 = subplot (2, 1, 1);
+
+    plot(x_pos, v_inner_forces, 'o');
+
+    ax2 = subplot(2, 1, 2);
+
+    plot(x_pos, m_inner_forces, 'o');
+
+    waitfor(fig)
+end
+
+function ret = output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces)
+    % Output
+
+    for i = 2:length(v_forces)
+        printf("[Vertical force %d] [Applied at %.2e m] [Magnitude = %.4e N]\n", i - 1, v_forces(i).pos, v_forces(i).mag)
+    end
+
+    if length(v_dist_forces) >= 2
+        printf("\n");
+    end
+
+    for i = 2:length(v_dist_forces)
+        printf("[Vertical Distributed forces %d] [Applied at %.2e m] [Magnitude = %.4e N]\n", i - 1, v_dist_forces(i).pos, v_dist_forces(i).mag)
+    end
+
+    if length(h_forces) >= 2
+        printf("\n");
+    end
+
+    for i = 2:length(h_forces)
+        printf("[Horizontal force %d] [Applied at %.2e m] [Magnitude = %.4e N]\n", i - 1, h_forces(i).pos, h_forces(i).mag)
+    end
+
+    if length(t_forces) >= 2
+        printf("\n");
+    end
+
+    for i = 2:length(t_forces)
+        printf("[Torque force %d] [Due the position %.2e m] [Magnitude = %.4e N]\n", i - 1, t_forces(i).pos, t_forces(i).mag)
+    end
+
+    if length(m_forces) >= 2
+        printf("\n");
+    end
+
+    for i = 2:length(m_forces)
+        printf("[Momemtum force %d] [Due the position %.2e m] [Magnitude = %.4e N]\n", i - 1, m_forces(i).pos, m_forces(i).mag)
+    end
+
 end

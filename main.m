@@ -1,5 +1,11 @@
 global obj
 
-obj = UI();
+args = argv();
 
-obj.build();
+obj = UI(args);
+
+if length(args) == 0
+    obj.build();
+else
+    obj.solve()
+end
