@@ -556,7 +556,6 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
     set(edit, 'String', "");
 end
 
-<<<<<<< HEAD
 
 function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view_begin, view_end, view_coef)
     get(edit_begin, 'String');
@@ -584,8 +583,6 @@ function addTextViewText(view, text)
     set(view, 'String', strcat(old_text, "[", text, "]"));
 end
 
-=======
->>>>>>> 83c61f189100195ce52c2548fa45a4338db6b350
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve the resmat given problem                                         % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
