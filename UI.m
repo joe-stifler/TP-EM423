@@ -88,7 +88,7 @@ classdef UI
                 "style",
                 "text",
                 "string",
-                "Convention: ",
+                "Conventions: ",
                 "position",
                 [first_column zero_line view_width component_height]
             );
@@ -938,15 +938,132 @@ function solve_problem(obj)
         obj.data_num_steps
     );
 
-    fig = figure();
+    screen_size = get(0,'ScreenSize');
 
-    ax1 = subplot (2, 1, 1);
+    % obj.f = figure('Position', screen_size);
+    fig = figure('Position', screen_size);
 
-    plot(x_pos, v_inner_forces, 'o');
+    subplot (3, 1, 1);
 
-    ax2 = subplot(2, 1, 2);
+    plot(x_pos, 0 * x_pos, '-', 'linewidth', 5);
 
-    plot(x_pos, m_inner_forces, 'o');
+    xlim([0 obj.data_beam_width]);
+    ylim([-1 1]);
+
+    hold on;
+
+    plot_width = 0.775;
+    first_plot_x = 0.13;
+    first_plot_y = 0.81;
+
+    y_pos = 1;
+    y_neg = 1;
+
+    for i = 2:length(h_forces)
+        force = h_forces(i);
+        
+        if force.mag >= 0
+            y = [first_plot_y first_plot_y] + 0.025 * y_pos;
+            y_pos = y_pos + 1;
+
+            x = first_plot_x + [-0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+        else
+            y = [first_plot_y first_plot_y] + 0.025 * y_neg;
+            y_neg = y_neg + 1;
+
+            x = first_plot_x + plot_width + [0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+        end
+    end
+
+    y_pos = 1;
+    y_neg = 1;
+
+    for i = 2:length(t_forces)
+        force = t_forces(i);
+        
+        if force.mag >= 0
+            y = [first_plot_y first_plot_y] - 0.025 * y_pos;
+            y_pos = y_pos + 1;
+
+            x = first_plot_x + [-0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+        else
+            y = [first_plot_y first_plot_y] - 0.025 * y_neg;
+            y_neg = y_neg + 1;
+
+            x = first_plot_x + plot_width + [0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+        end
+    end
+
+    for i = 2:length(obj.data_supports)
+        support_ = obj.data_supports(i);
+        plot([support_.pos], [0], 'o', 'color', 'black', 'linewidth', 8);
+
+        if support_.type == SupportType().Pinned
+            text(support_.pos + 0.005 * obj.data_beam_width, -0.1, 'Pinned', 'fontsize', 14);
+        elseif support_.type == SupportType().Fixed
+            text(support_.pos + 0.005 * obj.data_beam_width, -0.1, 'Fixed', 'fontsize', 14);
+        elseif support_.type == SupportType().Roller
+            text(support_.pos + 0.005 * obj.data_beam_width, -0.1, 'Roller', 'fontsize', 14);
+        end
+    end
+
+    for i = 2:length(v_forces)
+        force = v_forces(i);
+        
+        x = first_plot_x + [0 0] + force.pos * (plot_width / obj.data_beam_width);
+
+        if force.mag >= 0
+            y = first_plot_y + [-0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+        else
+            y = first_plot_y + [0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+        end
+    end
+
+    title('Force Diagram');
+
+    set(gca, "linewidth", 2, "fontsize", 14);
+
+    xlabel ("Beam Position (m) ");
+
+    set(gca,'ytick',[]);
+
+    subplot (3, 1, 2);
+
+    plot(x_pos, v_inner_forces, '*', "linewidth", 5);
+
+    xlim([0 obj.data_beam_width]);
+
+    ylabel ("Vertical Internal Force (N) ");
+
+    xlabel ("Beam Position (m) ");
+
+    grid on;
+
+    title('Vertical Internal Forces x Beam Position');
+
+    set(gca, "linewidth", 2, "fontsize", 14);
+
+    subplot(3, 1, 3);
+
+    plot(x_pos, m_inner_forces, '*', "linewidth", 5);
+
+    xlim([0 obj.data_beam_width]);
+
+    grid on;
+
+    ylabel ("Internal Momentum (Nm) ");
+
+    xlabel ("Beam Position (m) ");
+
+    title('Internal Momentum x Beam Position');
+
+    set(gca, "linewidth", 2, "fontsize", 14);
 
     waitfor(fig)
 end

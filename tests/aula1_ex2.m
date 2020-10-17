@@ -32,7 +32,7 @@ vertical_forces(length(vertical_forces) + 1) = Force(6, 3000);
 % - Magnitude > 0: pointing right   %
 % - Magnitude < 0: pointing left    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% horizontal_forces(length(horizontal_forces) + 1) = Force(0, -3000);
+horizontal_forces(length(horizontal_forces) + 1) = Force(0, -3000);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The torque forces (horizontal only) %
