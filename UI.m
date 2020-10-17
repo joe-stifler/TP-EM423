@@ -967,13 +967,13 @@ function solve_problem(obj)
             y_pos = y_pos + 1;
 
             x = first_plot_x + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
         else
             y = [first_plot_y first_plot_y] + 0.025 * y_neg;
             y_neg = y_neg + 1;
 
             x = first_plot_x + plot_width + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
         end
     end
 
@@ -988,13 +988,13 @@ function solve_problem(obj)
             y_pos = y_pos + 1;
 
             x = first_plot_x + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
         else
             y = [first_plot_y first_plot_y] - 0.025 * y_neg;
             y_neg = y_neg + 1;
 
             x = first_plot_x + plot_width + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
         end
     end
 
@@ -1018,10 +1018,24 @@ function solve_problem(obj)
 
         if force.mag >= 0
             y = first_plot_y + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         else
             y = first_plot_y + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(force.mag), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+        end
+    end
+
+    for i = 2:length(v_dist_forces)
+        force = v_dist_forces(i);
+        
+        x = first_plot_x + [0 0] + force.pos * (plot_width / obj.data_beam_width);
+
+        if force.mag >= 0
+            y = first_plot_y + [-0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+        else
+            y = first_plot_y + [0.05 0];
+            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         end
     end
 

@@ -18,8 +18,8 @@ beam_width = 6;
 % - Magnitude > 0: pointing up      %
 % - Magnitude < 0: pointing down    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_forces(length(vertical_forces) + 1) = Force(2, -8000);
-vertical_forces(length(vertical_forces) + 1) = Force(6, 3000);
+vertical_forces(length(vertical_forces) + 1) = Force(1.5, -10000);
+vertical_forces(length(vertical_forces) + 1) = Force(4.5, -15000);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The horizontal forces           %
@@ -44,8 +44,7 @@ vertical_forces(length(vertical_forces) + 1) = Force(6, 3000);
 % - Magnitude > 0: pointing right     %
 % - Magnitude < 0: pointing left      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-torques(length(torques) + 1) = Force(0, 500);
-torques(length(torques) + 1) = Force(0, -900);
+% torques(length(torques) + 1) = Force(0, 30);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The distributed vertical forces         %
@@ -63,7 +62,8 @@ torques(length(torques) + 1) = Force(0, -900);
 % - polynomial_function > 0: pointing up   %
 % - polynomial_function < 0: pointing down %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(1, 30, @(x)(4 * x ./ x));
+% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(0, 4.5, @(x)(-(5000 / 4.5) * x), @(x)(-(5000 / 4.5) * x .* x));
+% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(4.5, 9, @(x)(-((5000 / 4.5) * x - 5000)), @(x)(-((5000 / 4.5) * x - 5000) .* x));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The horizontal supports         %
@@ -75,5 +75,5 @@ torques(length(torques) + 1) = Force(0, -900);
 %     - SupportType().Roller       %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-supports(length(supports) + 1) = Support(0, SupportType().Roller);
-supports(length(supports) + 1) = Support(4, SupportType().Pinned);
+supports(length(supports) + 1) = Support(0, SupportType().Pinned);
+supports(length(supports) + 1) = Support(6, SupportType().Roller);
