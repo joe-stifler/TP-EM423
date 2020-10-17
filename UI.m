@@ -815,6 +815,9 @@ end
 
 function clearSupports(hObject, eventdata, edit, listbox, listboxID, view)
     global obj 
+    
+    supports(1) = Support(0, SupportType().Dummy);
+    obj.data_supports = supports;
 
     set(view, 'String', '');
     set(edit, 'String', "");
@@ -882,15 +885,11 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
     if length(fun_str) > 0
         fun = inline(fun_str);
 
-        beg_str = '';
-
-        % if length(obj.data_vertical_dist_forces) > 1
         beg_str = " , ";
-        % end
 
         addTextViewText(view_begin, [num2str(begin_pos) "m ; " num2str(end_pos) "m ; " fun_str], beg_str);
 
-        new_dist_force = DistForce(begin_pos, end_pos, fun, @(x) x .* fun(x));
+        new_dist_force = DistForce(begin_pos, end_pos, fun, @(x) (x .* fun(x)));
         
         obj.data_vertical_dist_forces(length(obj.data_vertical_dist_forces) + 1) = new_dist_force;
 
