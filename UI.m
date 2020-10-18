@@ -851,7 +851,14 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
         text = "";
 
         for i = 2:length(obj.data_supports)
-            text = strcat(text, "[pos = ", num2str(obj.data_supports(i).pos),  "m ; type = " , selection(support_type_str), "], ");
+            if obj.data_supports(i).type == SupportType().Pinned
+                text = strcat(text, "[pos = ", num2str(obj.data_supports(i).pos),  "m ; type = " , "Pinned", "], ");
+            elseif obj.data_supports(i).type == SupportType().Roller
+                text = strcat(text, "[pos = ", num2str(obj.data_supports(i).pos),  "m ; type = " , "Roller", "], ");
+            elseif obj.data_supports(i).type == SupportType().Fixed
+                text = strcat(text, "[pos = ", num2str(obj.data_supports(i).pos),  "m ; type = " , "Fixed", "], ");
+            end
+
         end
 
         set(view, 'String', text);
