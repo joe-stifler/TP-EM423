@@ -54,12 +54,18 @@ classdef    lib_resmat
                     
                     sum_vertical_forces = sum_vertical_forces + resultant_force.mag;
 
-                    sum_momentums_forces = sum_momentums_forces + (0 - resultant_force.pos) * resultant_force.mag;
+                    res_force = (0 - resultant_force.pos) * resultant_force.mag;
+
+                    if isnan(res_force)
+                        res_force = 0
+                    end
+
+                    sum_momentums_forces = sum_momentums_forces + res_force;
 
                     % add the punctual forces to the end of the vertical forces vector
                     v_dist_forces(length(v_dist_forces) + 1) = resultant_force;
 
-                    m_forces(length(m_forces) + 1) = Force(resultant_force.pos, (0 - resultant_force.pos) * resultant_force.mag);
+                    m_forces(length(m_forces) + 1) = Force(resultant_force.pos, res_force);
                 end
             end
         
