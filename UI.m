@@ -27,7 +27,7 @@ classdef UI
 
             % Add the input file here
             if length(args) > 0
-                run(args{1});
+                run(args);
             end
 
             obj.data_num_steps = 100;
@@ -48,7 +48,7 @@ classdef UI
             clear h;
             
             % Plotting
-            screen_size = get(0,'ScreenSize');
+            screen_size = get(0, 'ScreenSize');
 
             % obj.f = figure('Position', screen_size);
             obj.f = figure('Position', screen_size);

@@ -1,6 +1,14 @@
 global obj
 
-args = argv();
+args = "";
+
+_args = argv();
+
+% Verifies if some argument was passed
+% and if it is a octave script
+if length(_args) > 0 && _args{1}(end) == 'm'
+    args = _args{1}
+end
 
 obj = UI(args);
 
