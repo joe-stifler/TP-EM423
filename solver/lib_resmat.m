@@ -1,12 +1,13 @@
 classdef    lib_resmat 
     methods ( Static = true )
-        function [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = res_mat_1d_solver(
+        function [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = res_mat_1d_solver(
                 beam_width,
                 vertical_forces,
                 horizontal_forces,
                 torques,
                 vertical_dist_forces,
-                supports
+                supports,
+                momentums
             )
 
             t_forces = torques;
@@ -14,6 +15,7 @@ classdef    lib_resmat
             m_forces(1) = Force(0, 0);
             h_forces = horizontal_forces;
             v_dist_forces(1) = Force(0, 0);
+            support_momentuns(1) = Force(0, 0);
 
             % calculates the resultant vertical and horizontal forces, as well the resultant torques
             sum_torque_forces = 0;
@@ -80,6 +82,15 @@ classdef    lib_resmat
                     sum_momentums_forces = sum_momentums_forces + (0 - force.pos) * force.mag;
 
                     m_forces(length(m_forces) + 1) = Force(force.pos, (0 - force.pos) * force.mag);
+                end
+            end
+
+            % resultant horizontal forces
+            for i = 2:length(momentums)
+                force = momentums(i);
+
+                if force.pos <= beam_width
+                    sum_momentums_forces = sum_momentums_forces + force.mag;
                 end
             end
         
@@ -237,6 +248,8 @@ classdef    lib_resmat
                             A(4, num_incognitas + 1) = 1;
                         else
                             m_forces(length(m_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
+
+                            support_momentuns(length(support_momentuns) + 1) = Force(_support.pos, X(num_incognitas + 1));
                         end
                         
                         num_incognitas = num_incognitas + 1;
@@ -281,7 +294,8 @@ classdef    lib_resmat
                         horizontal_forces,
                         torques,
                         vertical_dist_forces,
-                        supports
+                        supports,
+                        momentums
                     );
 
                     v_inner_forces(1, i) = -X(3);

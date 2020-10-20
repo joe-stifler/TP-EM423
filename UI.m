@@ -923,13 +923,16 @@ end
 function solve_problem(obj)
     printf("**************************************************\n")
 
-    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = lib_resmat.res_mat_1d_solver(
+    momentuns(1) = Force(0, 0);
+
+    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = lib_resmat.res_mat_1d_solver(
         obj.data_beam_width,
         obj.data_vertical_forces,
         obj.data_horizontal_forces,
         obj.data_torques,
         obj.data_vertical_dist_forces,
-        obj.data_supports
+        obj.data_supports,
+        momentuns
     );
 
     output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
@@ -939,14 +942,13 @@ function solve_problem(obj)
         v_forces,
         h_forces,
         t_forces,
-        m_forces,
+        support_momentuns,
         obj.data_vertical_dist_forces,
         obj.data_num_steps
     );
 
     screen_size = get(0,'ScreenSize');
 
-    % obj.f = figure('Position', screen_size);
     fig = figure('Position', screen_size);
 
     subplot (3, 1, 1);
@@ -973,13 +975,14 @@ function solve_problem(obj)
             y_pos = y_pos + 1;
 
             x = first_plot_x + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+            annotation('textarrow', x, y,'String', strcat('Fh = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+            % annotation('doublearrow', x, y);
         else
             y = [first_plot_y first_plot_y] + 0.025 * y_neg;
             y_neg = y_neg + 1;
 
             x = first_plot_x + plot_width + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
+            annotation('textarrow', x, y,'String', strcat('Fh = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
         end
     end
 
@@ -994,13 +997,13 @@ function solve_problem(obj)
             y_pos = y_pos + 1;
 
             x = first_plot_x + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+            annotation('textarrow', x, y,'String', strcat('T = ', mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'green');
         else
             y = [first_plot_y first_plot_y] - 0.025 * y_neg;
             y_neg = y_neg + 1;
 
             x = first_plot_x + plot_width + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
+            annotation('textarrow', x, y,'String', strcat('T = ', mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'green');
         end
     end
 
@@ -1024,11 +1027,29 @@ function solve_problem(obj)
 
         if force.mag >= 0
             y = first_plot_y + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat('Fv = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         else
             y = first_plot_y + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat('Fv = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         end
+    end
+
+    for i = 2:length(support_momentuns)
+        force = support_momentuns(i);
+        
+        x = first_plot_x + [-0.025 -0.025] + force.pos * (plot_width / obj.data_beam_width);
+
+        force.mag
+
+        if force.mag >= 0
+            y = first_plot_y + [-0.05 0.08];
+        else
+            y = first_plot_y + [0.05 -0.08];
+        end
+
+        annotation('line', x, y, 'linewidth', 5, 'color', 'blue');
+
+        annotation('textarrow', [x(1) x(1) + 0.035], [y(2) y(2)], 'String', strcat('M = ', mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'blue');
     end
 
     for i = 2:length(v_dist_forces)
@@ -1038,10 +1059,10 @@ function solve_problem(obj)
 
         if force.mag >= 0
             y = first_plot_y + [-0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat('Fdv = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         else
             y = first_plot_y + [0.05 0];
-            annotation('textarrow', x, y,'String', strcat(mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
+            annotation('textarrow', x, y,'String', strcat('Fdv = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'red');
         end
     end
 
@@ -1055,7 +1076,7 @@ function solve_problem(obj)
 
     subplot (3, 1, 2);
 
-    plot(x_pos, v_inner_forces, '*', "linewidth", 5);
+    plot(x_pos, v_inner_forces, '*', "linewidth", 5, 'color', 'red');
 
     xlim([0 obj.data_beam_width]);
 
@@ -1071,7 +1092,7 @@ function solve_problem(obj)
 
     subplot(3, 1, 3);
 
-    plot(x_pos, m_inner_forces, '*', "linewidth", 5);
+    plot(x_pos, m_inner_forces, '*', "linewidth", 5, 'color', 'blue');
 
     xlim([0 obj.data_beam_width]);
 
