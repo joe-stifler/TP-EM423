@@ -45,7 +45,7 @@ vertical_forces(length(vertical_forces) + 1) = Force(6, 3000);
 % - Magnitude < 0: pointing left      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 torques(length(torques) + 1) = Force(0, 500);
-torques(length(torques) + 1) = Force(0, -900);
+torques(length(torques) + 1) = Force(6, -900);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The distributed vertical forces         %
