@@ -780,7 +780,7 @@ function text = getTextFromForces(data_forces)
     end
 end
 
-function clearTorques(hObject, eventdata, edit_pos, edit_mag, view)
+function clearTorques(hObject, eventdata, edit_mag, view)
     global obj
 
     torque_forces(1) = Force(0, 0);
@@ -793,8 +793,7 @@ end
 function getTorques(hObject, eventdata, edit_mag, view)
     global obj 
 
-    mag = get(edit_mag, 'String')
-
+    mag = get(edit_mag, 'String');
 
     if length(mag) > 0
         mag = str2double(mag);

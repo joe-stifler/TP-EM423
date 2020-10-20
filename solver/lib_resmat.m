@@ -59,7 +59,7 @@ classdef    lib_resmat
                     res_force = (0 - resultant_force.pos) * resultant_force.mag;
 
                     if isnan(res_force)
-                        res_force = 0
+                        res_force = 0;
                     end
 
                     sum_momentums_forces = sum_momentums_forces + res_force;
