@@ -61,8 +61,8 @@ beam_width = 9;
 % - polynomial_function > 0: pointing up   %
 % - polynomial_function < 0: pointing down %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(0, 4.5, @(x)(-(5000 / 4.5) * x), @(x)(-(5000 / 4.5) * x .* x));
-vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(4.5, 9, @(x)(-((5000 / 4.5) * x - 5000)), @(x)(-((5000 / 4.5) * x - 5000) .* x));
+vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(0, 4.5, "-1111.1, 0");
+vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(4.5, 9, "-1111.1, 5000");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The horizontal supports         %

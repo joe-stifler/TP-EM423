@@ -2,16 +2,21 @@ classdef DistForce
    properties
       pos_beg;
       pos_end;
-      dist_func;
-      dist_func_times_x;
+      poly_func;
    end
    
    methods
-      function obj = DistForce(_pos_beg, _pos_end, _dist_func, _dist_func_times_x)
+      function obj = DistForce(_pos_beg, _pos_end, _poly_func)
          obj.pos_beg = _pos_beg;
          obj.pos_end = _pos_end;
-         obj.dist_func = _dist_func;
-         obj.dist_func_times_x = _dist_func_times_x;
+         
+         splitval = strsplit(_poly_func, ',');
+
+         obj.poly_func = zeros(1, length(splitval));
+
+         for i = 1:length(splitval)
+            obj.poly_func(i) = str2double(splitval(i));
+         end
       end
    end
 end

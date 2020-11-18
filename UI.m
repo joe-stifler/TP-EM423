@@ -8,6 +8,8 @@ classdef UI
         data_supports;
         data_vertical_dist_forces;
         data_num_steps;
+        young_module;
+        momentum_inertia;
     end
 
     methods
@@ -19,11 +21,13 @@ classdef UI
 
             % Load my data
             beam_width = 0;
+            young_module = 1;
+            momentum_inertia = 1;
             torques(1) = Force(0, 0);
             vertical_forces(1) = Force(0, 0);
             horizontal_forces(1) = Force(0, 0);
             supports(1) = Support(0, SupportType().Dummy);
-            vertical_dist_forces(1) = DistForce(0, 0, @(x)(0), @(x)(0));
+            vertical_dist_forces(1) = DistForce(0, 0, "0");
 
             % Add the input file here
             if length(args) > 0
@@ -33,6 +37,8 @@ classdef UI
             obj.data_num_steps = 100;
             obj.data_beam_width = beam_width;
             obj.data_torques = torques;
+            obj.young_module = young_module;
+            obj.momentum_inertia = momentum_inertia;
             obj.data_horizontal_forces = horizontal_forces;
             obj.data_vertical_forces = vertical_forces;
             obj.data_supports = supports;
@@ -889,13 +895,11 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
     fun_str = get(edit_coef, 'String');
 
     if length(fun_str) > 0
-        fun = inline(fun_str);
-
         beg_str = " , ";
 
         addTextViewText(view_begin, [num2str(begin_pos) "m ; " num2str(end_pos) "m ; " fun_str], beg_str);
 
-        new_dist_force = DistForce(begin_pos, end_pos, fun, @(x) (x .* fun(x)));
+        new_dist_force = DistForce(begin_pos, end_pos, fun_str);
         
         obj.data_vertical_dist_forces(length(obj.data_vertical_dist_forces) + 1) = new_dist_force;
 
@@ -936,14 +940,16 @@ function solve_problem(obj)
 
     output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
 
-    [x_pos, v_inner_forces, m_inner_forces] = lib_resmat.res_mat_1d_inner_solver(
+    [x_pos, v_inner_forces, m_inner_forces, slope, deflection] = lib_resmat.res_mat_1d_inner_solver(
         obj.data_beam_width,
         v_forces,
         h_forces,
         t_forces,
         support_momentuns,
         obj.data_vertical_dist_forces,
-        obj.data_num_steps
+        obj.data_num_steps,
+        obj.young_module,
+        obj.momentum_inertia
     );
 
     screen_size = get(0,'ScreenSize');

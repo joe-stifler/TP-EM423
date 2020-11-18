@@ -61,7 +61,7 @@ torques(length(torques) + 1) = Force(0, 900);
 % - polynomial_function > 0: pointing up   %
 % - polynomial_function < 0: pointing down %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(2, 5, @(x)(-(-2.5 * x + 12.5) * 1000), @(x)(-(-2.5 * x + 12.5) * 1000 .* x));
+vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(2, 5, "2500, -12500");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The horizontal supports         %

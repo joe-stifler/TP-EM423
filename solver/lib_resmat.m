@@ -1,5 +1,13 @@
 classdef    lib_resmat 
     methods ( Static = true )
+        function val = delta(x)
+            if x >= 0
+                val = 1;
+            else
+                val = 0;
+            end
+        end
+
         function [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = res_mat_1d_solver(
                 beam_width,
                 vertical_forces,
@@ -39,18 +47,17 @@ classdef    lib_resmat
 
                 if dist_force.pos_beg <= beam_width
                     % calculates the resultant force (integrates from `beg` to `end`)
-                    result_force_int = quadcc(
-                        @(x) (dist_force.dist_func(x) + 0 * x),
-                        dist_force.pos_beg,
-                        min(dist_force.pos_end, beam_width)
-                    );
+
+                    poly_int_res = polyint(dist_force.poly_func);
+
+                    result_force_int = polyval(poly_int_res, min(dist_force.pos_end, beam_width)) - polyval(poly_int_res, dist_force.pos_beg);
             
+                    aux_poly = dist_force.poly_func;
+                    aux_poly(length(aux_poly) + 1) = 0;
+                    poly_int_res = polyint(aux_poly);
+
                     % calculates the centroid of the force (integrates from `beg` to `end`)
-                    centroid = quadcc(
-                        @(x) (dist_force.dist_func_times_x(x) + 0 * x),
-                        dist_force.pos_beg,
-                        min(dist_force.pos_end, beam_width)
-                    ) / result_force_int;
+                    centroid = (polyval(poly_int_res, min(dist_force.pos_end, beam_width)) - polyval(poly_int_res, dist_force.pos_beg)) / result_force_int;
 
                     resultant_force = Force(centroid, result_force_int);
                     
@@ -262,44 +269,148 @@ classdef    lib_resmat
             end
         end
     
-        function [x_pos, v_inner_forces, m_inner_forces] = res_mat_1d_inner_solver(
+        function [x_pos, v_inner_forces, m_inner_forces, slope, deflection] = res_mat_1d_inner_solver(
                 beam_width,
                 vertical_forces,
                 horizontal_forces,
                 torques,
                 momentums,
                 vertical_dist_forces,
-                num_steps
+                num_steps,
+                young_module,
+                moment_inertia
             )
 
             x_pos = 0;
+            slope = 0;
+            deflection = 0;
             v_inner_forces = 0;
             m_inner_forces = 0;
 
             if num_steps > 0
                 x_pos = [0 : beam_width / num_steps : beam_width];
 
+                slope = zeros(1, length(x_pos));
+                deflection = zeros(1, length(x_pos));
                 v_inner_forces = zeros(1, length(x_pos));
                 m_inner_forces = zeros(1, length(x_pos));
 
-                for i = 1:length(x_pos)
-                    x = x_pos(i);
+                pos_vx = 1;
 
-                    supports(1) = Support(0, SupportType().Dummy);
-                    supports(2) = Support(x, SupportType().Fixed);
+                % add the vertical forces
+                for i = 1:length(vertical_forces)
+                    v_force = vertical_forces(i);
 
-                    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X] = lib_resmat.res_mat_1d_solver(
-                        x,
-                        vertical_forces,
-                        horizontal_forces,
-                        torques,
-                        vertical_dist_forces,
-                        supports,
-                        momentums
-                    );
+                    Vx(pos_vx).pos = v_force.pos;
+                    Vx(pos_vx).mag = [v_force.mag];
 
-                    v_inner_forces(1, i) = -X(3);
-                    m_inner_forces(1, i) = -X(4);
+                    pos_vx = pos_vx + 1;
+                end
+
+                % add the distributed forces
+                for i = 1:length(vertical_dist_forces)
+                    dist_v_force = vertical_dist_forces(i);
+
+                    Vx(pos_vx).pos = dist_v_force.pos_beg;
+                    Vx(pos_vx).mag = polyint(dist_v_force.poly_func);
+
+                    pos_vx = pos_vx + 1;
+
+                    Vx(pos_vx).pos = dist_v_force.pos_end;
+                    Vx(pos_vx).mag = -1 * polyint(dist_v_force.poly_func);
+
+                    pos_vx = pos_vx + 1;
+                end
+
+                % forças cortantes
+                if pos_vx > 1
+                    for i = 1:length(x_pos)
+                        x = x_pos(i);
+                        res_force = 0;
+                        
+                        for j = 1:pos_vx-1
+                            res_force = res_force + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        v_inner_forces(1, i) = res_force;
+                        % m_inner_forces(1, i) = -X(4);
+                    end
+                end
+
+                % integrate all terms to get the momentum
+                for i = 1:pos_vx-1
+                    Vx(i).mag = polyint(Vx(i).mag);
+                end
+
+                % add the momentum term
+                for i = 1:length(momentums)
+                    momentum_force = momentums(i);
+
+                    Vx(pos_vx).pos = momentum_force.pos;
+                    Vx(pos_vx).mag = [momentum_force.mag];
+
+                    pos_vx = pos_vx + 1;
+                end
+
+                % internal momentum calculation
+                if pos_vx > 1
+                    for i = 1:length(x_pos)
+                        x = x_pos(i);
+                        momentum_force = 0;
+                        
+                        for j = 1:pos_vx-1
+                            momentum_force = momentum_force + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        m_inner_forces(1, i) = momentum_force;
+                    end
+                end
+
+                % integrate all terms to get the slope
+                for i = 1:pos_vx-1
+                    Vx(i).mag = polyint(Vx(i).mag);
+                end
+                
+
+                % find the C_3 constant
+
+
+                % slope calculation
+                if pos_vx > 1
+                    for i = 1:length(x_pos)
+                        x = x_pos(i);
+                        s = 0;
+                        
+                        for j = 1:pos_vx-1
+                            s = s + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        slope(1, i) = s / (young_module * moment_inertia);
+                    end
+                end
+
+
+                % integrate all terms to get the deflection
+                for i = 1:pos_vx-1
+                    Vx(i).mag = polyint(Vx(i).mag);
+                end
+
+
+                % find the C_4 constant
+
+
+                % deflection calculation
+                if pos_vx > 1
+                    for i = 1:length(x_pos)
+                        x = x_pos(i);
+                        d = 0;
+                        
+                        for j = 1:pos_vx-1
+                            d = d + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        deflection(1, i) = d / (young_module * moment_inertia);
+                    end
                 end
             end
         end

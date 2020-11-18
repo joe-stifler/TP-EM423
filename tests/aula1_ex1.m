@@ -61,7 +61,7 @@ horizontal_forces(length(horizontal_forces) + 1) = Force(0, -3000);
 % - polynomial_function > 0: pointing up   %
 % - polynomial_function < 0: pointing down %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(1, 30, @(x)(4 * x ./ x));
+% vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(1, 30, "4");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The horizontal supports         %
