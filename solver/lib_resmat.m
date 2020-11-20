@@ -170,7 +170,7 @@ classdef    lib_resmat
                             A(3, num_incognitas + 1) = 1;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
-                            t_forces(length(t_forces) + 1) = Force(0, X(num_incognitas + 1));
+                            t_forces(length(t_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
@@ -183,7 +183,7 @@ classdef    lib_resmat
                             A(2, num_incognitas + 1) = 1;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
-                            h_forces(length(h_forces) + 1) = Force(0, X(num_incognitas + 1));
+                            h_forces(length(h_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                         end
                         
                         num_incognitas = num_incognitas + 1;
@@ -215,7 +215,7 @@ classdef    lib_resmat
                             A(3, num_incognitas + 1) = 1;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
-                            t_forces(length(t_forces) + 1) = Force(0, X(num_incognitas + 1));
+                            t_forces(length(t_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;
@@ -228,7 +228,7 @@ classdef    lib_resmat
                             A(2, num_incognitas + 1) = 1;
                         else
                             % Assumes that we already evaluate `X` through the linear system solution
-                            h_forces(length(h_forces) + 1) = Force(0, X(num_incognitas + 1));
+                            h_forces(length(h_forces) + 1) = Force(_support.pos, X(num_incognitas + 1));
                         end
 
                         num_incognitas = num_incognitas + 1;

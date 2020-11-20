@@ -10,6 +10,8 @@ if length(_args) > 0 && _args{1}(end) == 'm'
     args = _args{1}
 end
 
+args = "tests/aula7_ex1.m";
+
 obj = UI(args);
 
 if length(args) == 0

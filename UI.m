@@ -465,9 +465,7 @@ classdef UI
                 "string",
                 "0",
                 "position",
-                [second_column seventh_line view_width component_height],
-                "enable",
-                "inactive"
+                [second_column seventh_line view_width component_height]
             );
             
             edit_horizontal_f_mag = uicontrol(
@@ -532,9 +530,7 @@ classdef UI
                 "string",
                 "0",
                 "position",
-                [second_column eight_line view_width component_height],
-                "enable",
-                "inactive"
+                [second_column eight_line view_width component_height]
             );
 
             edit_torque = uicontrol(
@@ -562,7 +558,7 @@ classdef UI
                 "string",
                 "Add Torque",
                 "callback",
-                {@getTorques, edit_torque, text_view_torques},
+                {@getTorques, edit_torque_pos, edit_torque, text_view_torques},
                 "position",
                 [fourth_column eight_line 2 * view_width + 10 component_height]
             );
@@ -796,15 +792,17 @@ function clearTorques(hObject, eventdata, edit_mag, view)
     set(edit_mag, 'String', "");
 end
 
-function getTorques(hObject, eventdata, edit_mag, view)
+function getTorques(hObject, eventdata, edit_pos, edit_mag, view)
     global obj 
 
     mag = get(edit_mag, 'String');
+    pos = get(edit_pos, 'String');
 
-    if length(mag) > 0
+    if length(mag) > 0 && length(pos) > 0
         mag = str2double(mag);
+        pos = str2double(pos);
         
-        obj.data_torques(length(obj.data_torques) + 1) = Force(0, mag);
+        obj.data_torques(length(obj.data_torques) + 1) = Force(pos, mag);
 
         set(view, 'String', getTextFromTorques(obj.data_torques));
         set(edit_mag, 'String', "");
@@ -1047,9 +1045,9 @@ function solve_problem(obj)
         force.mag
 
         if force.mag >= 0
-            y = first_plot_y + [-0.05 0.08];
+            y = first_plot_y + [-0.1 0.11];
         else
-            y = first_plot_y + [0.05 -0.08];
+            y = first_plot_y + [0.1 -0.11];
         end
 
         annotation('line', x, y, 'linewidth', 5, 'color', 'blue');
