@@ -576,7 +576,7 @@ classdef    lib_resmat
 
                 pos_tx = pos_tx + 1;
 
-                % elongation calculation
+                % torsion angle calculation
                 if pos_tx > 1
                     for i = 1:length(x_pos)
                         e = 0;

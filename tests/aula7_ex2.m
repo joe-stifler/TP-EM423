@@ -5,11 +5,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - width in meters                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-beam_width = 0.8;
+beam_width = 1;
 
-shear_module = 75.8 * 1e9;
+shear_module = 63.4 * 1e9;
 
-polar_momentum_inertia = 6.73 * 1e-8;
+polar_momentum_inertia = 6.14 * 1e-7;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,11 +50,8 @@ polar_momentum_inertia = 6.73 * 1e-8;
 % - Magnitude > 0: pointing right     %
 % - Magnitude < 0: pointing left      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-torques(length(torques) + 1) = Force(0, -600);
-torques(length(torques) + 1) = Force(0.2, 900);
-torques(length(torques) + 1) = Force(0.4, -500);
-torques(length(torques) + 1) = Force(0.6, -300);
-torques(length(torques) + 1) = Force(0.8, 500);
+torques(length(torques) + 1) = Force(0.4, 3000);
+torques(length(torques) + 1) = Force(1, -2000);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  The distributed vertical forces         %
@@ -84,5 +81,5 @@ torques(length(torques) + 1) = Force(0.8, 500);
 %     - SupportType().Roller       %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% supports(length(supports) + 1) = Support(0, SupportType().Fixed);
+supports(length(supports) + 1) = Support(0, SupportType().Fixed);
 

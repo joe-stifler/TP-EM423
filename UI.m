@@ -1044,6 +1044,32 @@ function solve_problem(obj)
     plot_data(
         r,
         c,
+        c + 5,
+        x_pos,
+        slope,
+        'Slope x Beam Position',
+        "Beam Position (m) ",
+        "Slope (rad) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 6,
+        x_pos,
+        deflection,
+        'Deflection x Beam Position',
+        "Beam Position (m) ",
+        "Deflection (m) ",
+        [0 obj.data_beam_width],
+        'blue'
+    );
+
+    plot_data(
+        r,
+        c,
         c + 7,
         x_pos,
         elongation,
