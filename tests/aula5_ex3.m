@@ -5,7 +5,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - width in meters                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-beam_width = 3.75;
+beam_width = 3;
+
+young_module = 13 * 1e9;
+
+momentum_inertia = 3.5 * 1e-4;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The vertical forces             %
@@ -31,9 +35,10 @@ beam_width = 3.75;
 % - Magnitude > 0: pointing right   %
 % - Magnitude < 0: pointing left    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-horizontal_forces(length(horizontal_forces) + 1) = Force(1, -9000);
-horizontal_forces(length(horizontal_forces) + 1) = Force(2.5, 4000);
-horizontal_forces(length(horizontal_forces) + 1) = Force(3.75, 2000);
+horizontal_forces(length(horizontal_forces) + 1) = Force(0, -12000);
+horizontal_forces(length(horizontal_forces) + 1) = Force(1, -18000);
+horizontal_forces(length(horizontal_forces) + 1) = Force(2, 8000);
+horizontal_forces(length(horizontal_forces) + 1) = Force(3, 22000);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The torque forces (horizontal only) %
@@ -75,4 +80,5 @@ horizontal_forces(length(horizontal_forces) + 1) = Force(3.75, 2000);
 %     - SupportType().Roller       %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-supports(length(supports) + 1) = Support(0, SupportType().Fixed);
+supports(length(supports) + 1) = Support(1, SupportType().Roller);
+supports(length(supports) + 1) = Support(2, SupportType().Roller);

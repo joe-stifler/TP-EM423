@@ -10,6 +10,8 @@ classdef UI
         data_num_steps;
         young_module;
         momentum_inertia;
+        shear_module;
+        polar_momentum_inertia;
     end
 
     methods
@@ -24,6 +26,8 @@ classdef UI
             young_module = 1;
             momentum_inertia = 1;
             torques(1) = Force(0, 0);
+            shear_module = 1;
+            polar_momentum_inertia = 1;
             vertical_forces(1) = Force(0, 0);
             horizontal_forces(1) = Force(0, 0);
             supports(1) = Support(0, SupportType().Dummy);
@@ -42,6 +46,8 @@ classdef UI
             obj.data_horizontal_forces = horizontal_forces;
             obj.data_vertical_forces = vertical_forces;
             obj.data_supports = supports;
+            obj.shear_module = shear_module;
+            obj.polar_momentum_inertia = polar_momentum_inertia;
             obj.data_vertical_dist_forces = vertical_dist_forces;
         end
 
@@ -921,6 +927,24 @@ function solve_gui(hObject, eventdata)
     solve_problem(obj)
 end
 
+function plot_data(r, c, n, data_x, data_y, _title, x_label, y_label, x_limits, dot_color)
+    subplot(r, c, n);
+
+    plot(data_x, data_y, '*', "linewidth", 5, 'color', dot_color);
+
+    xlim(x_limits);
+
+    grid on;
+
+    ylabel (y_label);
+
+    xlabel (x_label);
+
+    title(_title);
+
+    set(gca, "linewidth", 2, "fontsize", 14);
+end
+
 function solve_problem(obj)
     printf("**************************************************\n")
 
@@ -938,23 +962,112 @@ function solve_problem(obj)
 
     output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
 
-    [x_pos, v_inner_forces, m_inner_forces, slope, deflection] = lib_resmat.res_mat_1d_inner_solver(
+    [x_pos, h_inner_forces, t_inner_forces, v_inner_forces, m_inner_forces, slope, deflection, elongation, torsion_angle] = lib_resmat.res_mat_1d_inner_solver(
         obj.data_beam_width,
         v_forces,
         h_forces,
         t_forces,
         support_momentuns,
         obj.data_vertical_dist_forces,
+        obj.data_supports,
         obj.data_num_steps,
         obj.young_module,
-        obj.momentum_inertia
+        obj.momentum_inertia,
+        obj.shear_module,
+        obj.polar_momentum_inertia
     );
 
     screen_size = get(0,'ScreenSize');
 
     fig = figure('Position', screen_size);
 
-    subplot (3, 1, 1);
+    clf;
+    r = 3;
+    c = 4;
+
+    for n = 1 : r * c
+        subplot(r, c, n);
+    endfor
+
+    plot_data(
+        r,
+        c,
+        c + 1,
+        x_pos,
+        v_inner_forces,
+        'Vertical Internal Forces x Beam Position',
+        "Beam Position (m) ",
+        "Vertical Internal Force (N) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 2,
+        x_pos,
+        m_inner_forces,
+        'Internal Momentum x Beam Position',
+        "Beam Position (m) ",
+        "Internal Momentum (Nm) ",
+        [0 obj.data_beam_width],
+        'blue'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 3,
+        x_pos,
+        h_inner_forces,
+        'Horizontal Internal Forces x Beam Position',
+        "Beam Position (m) ",
+        "Horizontal Internal Force (N) ",
+        [0 obj.data_beam_width],
+        'black'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 4,
+        x_pos,
+        t_inner_forces,
+        'Internal Torque x Beam Position',
+        "Beam Position (m) ",
+        "Internal Torque (Nm) ",
+        [0 obj.data_beam_width],
+        'green'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 7,
+        x_pos,
+        elongation,
+        'Elongation x Beam Position',
+        "Beam Position (m) ",
+        "Elongation (m) ",
+        [0 obj.data_beam_width],
+        'black'
+    );
+
+    plot_data(
+        r,
+        c,
+        c + 8,
+        x_pos,
+        torsion_angle,
+        'Torsion Angle x Beam Position',
+        "Beam Position (m) ",
+        "Torsion Angle (Nm) ",
+        [0 obj.data_beam_width],
+        'green'
+    );
+
+    subplot (r, c, 1:c);
 
     plot(x_pos, 0 * x_pos, '-', 'linewidth', 5);
 
@@ -974,17 +1087,17 @@ function solve_problem(obj)
         force = h_forces(i);
         
         if force.mag >= 0
-            y = [first_plot_y first_plot_y] + 0.025 * y_pos;
+            y = [first_plot_y first_plot_y] + 0.015 * y_pos;
             y_pos = y_pos + 1;
 
-            x = first_plot_x + [-0.05 0];
+            x = first_plot_x + [-0.05 0] + force.pos * (plot_width / obj.data_beam_width);
             annotation('textarrow', x, y,'String', strcat('Fh = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
             % annotation('doublearrow', x, y);
         else
-            y = [first_plot_y first_plot_y] + 0.025 * y_neg;
+            y = [first_plot_y first_plot_y] + 0.015 * y_neg;
             y_neg = y_neg + 1;
 
-            x = first_plot_x + plot_width + [0.05 0];
+            x = first_plot_x + [0.05 0] + force.pos * (plot_width / obj.data_beam_width);
             annotation('textarrow', x, y,'String', strcat('Fh = ', mat2str(abs(force.mag)), 'N'), 'fontsize', 14, 'linewidth', 5, 'color', 'black');
         end
     end
@@ -996,16 +1109,19 @@ function solve_problem(obj)
         force = t_forces(i);
         
         if force.mag >= 0
-            y = [first_plot_y first_plot_y] - 0.025 * y_pos;
+            y = [first_plot_y first_plot_y] - 0.015 * y_pos;
             y_pos = y_pos + 1;
 
-            x = first_plot_x + [-0.05 0];
+            x = first_plot_x + [-0.05 0] + force.pos * (plot_width / obj.data_beam_width);
             annotation('textarrow', x, y,'String', strcat('T = ', mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'green');
         else
-            y = [first_plot_y first_plot_y] - 0.025 * y_neg;
+            y = [first_plot_y first_plot_y] - 0.015 * y_neg;
             y_neg = y_neg + 1;
+            
+            force.pos
+            force.mag
 
-            x = first_plot_x + plot_width + [0.05 0];
+            x = first_plot_x + [0.05 0] + force.pos * (plot_width / obj.data_beam_width);
             annotation('textarrow', x, y,'String', strcat('T = ', mat2str(abs(force.mag)), 'Nm'), 'fontsize', 14, 'linewidth', 5, 'color', 'green');
         end
     end
@@ -1045,9 +1161,9 @@ function solve_problem(obj)
         force.mag
 
         if force.mag >= 0
-            y = first_plot_y + [-0.1 0.11];
+            y = first_plot_y + [-0.05 0.08];
         else
-            y = first_plot_y + [0.1 -0.11];
+            y = first_plot_y + [0.05 -0.08];
         end
 
         annotation('line', x, y, 'linewidth', 5, 'color', 'blue');
@@ -1076,38 +1192,6 @@ function solve_problem(obj)
     xlabel ("Beam Position (m) ");
 
     set(gca,'ytick',[]);
-
-    subplot (3, 1, 2);
-
-    plot(x_pos, v_inner_forces, '*', "linewidth", 5, 'color', 'red');
-
-    xlim([0 obj.data_beam_width]);
-
-    ylabel ("Vertical Internal Force (N) ");
-
-    xlabel ("Beam Position (m) ");
-
-    grid on;
-
-    title('Vertical Internal Forces x Beam Position');
-
-    set(gca, "linewidth", 2, "fontsize", 14);
-
-    subplot(3, 1, 3);
-
-    plot(x_pos, m_inner_forces, '*', "linewidth", 5, 'color', 'blue');
-
-    xlim([0 obj.data_beam_width]);
-
-    grid on;
-
-    ylabel ("Internal Momentum (Nm) ");
-
-    xlabel ("Beam Position (m) ");
-
-    title('Internal Momentum x Beam Position');
-
-    set(gca, "linewidth", 2, "fontsize", 14);
 
     waitfor(fig)
 end
