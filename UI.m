@@ -60,13 +60,15 @@ classdef UI
             clear h;
             
             % Plotting
-            screen_size = get(0, 'ScreenSize');
+            % Testing to 1920x1080 screen DELETE ME
+            screen_size = [1, 1, 1920, 1080];
 
-            % obj.f = figure('Position', screen_size);
+            % screen_size = get(0, 'ScreenSize');
+
             obj.f = figure('Position', screen_size);
 
             num_columns = 8 + 2;
-            num_lines = 12 + 3;
+            num_lines = 17 + 3;
 
             % Properties
             view_width = (screen_size(3) - 80) / num_columns;
@@ -94,6 +96,9 @@ classdef UI
             tenth_line = ninth_line - component_height - 10;
             eleventh_line = tenth_line - component_height - 10;
             twelfth_line = eleventh_line - component_height - 10;
+            thirteenth_line = twelfth_line - component_height - 10;
+            fourteenth_line = thirteenth_line - component_height - 10;
+            fifteenth_line = fourteenth_line - component_height - 10;
 
             text_dist_force_begin_label = uicontrol (
                 obj.f,
@@ -387,7 +392,6 @@ classdef UI
                 "inactive"
             );
 
-            % Vertical forces
             text_vertical_forces = uicontrol(
                 obj.f,
                 "style",
@@ -582,7 +586,6 @@ classdef UI
 
 
 
-
             % Suport
             uicontrol(
                 obj.f,
@@ -682,13 +685,223 @@ classdef UI
                 [eight_column tenth_line 2 * view_width component_height]
             );
 
+
+
+
+
+            % Beam's tension properties
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Momentum Inertia\n[kg.m^2]",
+                "position",
+                [second_column eleventh_line view_width component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Young module [GPa]",
+                "position",
+                [third_column eleventh_line 3 * view_width + 20 component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Tension properties added",
+                "position",
+                [sixth_column eleventh_line 4 * view_width + 20 component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Tension Properties: ",
+                "position",
+                [first_column twelfth_line view_width 2 * component_height + 10],
+                "enable",
+                "inactive"
+            ); 
+
+            edit_momentum_inertia = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [second_column twelfth_line view_width component_height]
+            ); 
+
+            listbox_young_module = uicontrol(
+                obj.f,
+                "style",
+                "listbox",
+                "string",
+                 YoungModule().Materials,
+                "position",
+                [third_column twelfth_line view_width component_height]
+            );
+
+            text_view_tension_properties = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "",
+              "position",
+              [sixth_column twelfth_line 2 * view_width component_height],
+              "enable",
+              "inactive"
+            );
+
+            button_tension_properties = uicontrol(
+                obj.f,
+                "string",
+                "Add Properties",
+                "callback",
+                {@getTensionProperties, edit_momentum_inertia, listbox_young_module, text_view_tension_properties},
+                "position",
+                [fourth_column twelfth_line 2 * view_width + 10 component_height]
+            );
+
+            button_clear_tension_properties = uicontrol(
+                obj.f,
+                "string",
+                "Clear Properties",
+                "callback",
+                {@clearTorsionProperties, edit_momentum_inertia, listbox_young_module, text_view_tension_properties},
+                "position",
+                [eight_column twelfth_line 2 * view_width component_height]
+            );
+
+
+            % Beam torsion properties
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Polar Momentum\nInertia [kg.m^2]",
+                "position",
+                [second_column thirteenth_line view_width component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Shear module [GPa]",
+                "position",
+                [third_column thirteenth_line 3 * view_width + 20 component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Torsion properties added",
+                "position",
+                [sixth_column thirteenth_line 4 * view_width + 20 component_height],
+                "enable",
+                "inactive"
+            ); 
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Torsion Properties:",
+                "position",
+                [first_column fourteenth_line view_width 2 * component_height + 10],
+                "enable",
+                "inactive"
+            ); 
+
+            edit_polar_momentum_inertia = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "",
+                "position",
+                [second_column fourteenth_line view_width component_height]
+            ); 
+
+            listbox_shear_module = uicontrol(
+                obj.f,
+                "style",
+                "listbox",
+                "string",
+                ShearModule().Materials,
+                "position",
+                [third_column fourteenth_line view_width component_height]
+            );
+
+            text_view_torsion_properties = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "",
+              "position",
+              [sixth_column fourteenth_line 2 * view_width component_height],
+              "enable",
+              "inactive"
+            );
+
+            button_torsion_properties = uicontrol(
+                obj.f,
+                "string",
+                "Add Properties",
+                "callback",
+                {@getTorsionProperties, edit_polar_momentum_inertia, listbox_shear_module, text_view_torsion_properties},
+                "position",
+                [fourth_column fourteenth_line 2 * view_width + 10 component_height]
+            );
+
+            button_torsion_properties = uicontrol(
+                obj.f,
+                "string",
+                "Clear Properties",
+                "callback",
+                {@clearTorsionProperties, edit_polar_momentum_inertia, listbox_shear_module, text_view_torsion_properties},
+                "position",
+                [eight_column fourteenth_line 2 * view_width component_height]
+            );
+
+
+
+
             % Button
             button_save = uicontrol(
                 obj.f,
                 "string",
                 "Save Input",
                 "position",
-                [sixth_column eleventh_line 4 * view_width + 20 component_height]
+                [sixth_column fifteenth_line 4 * view_width + 20 component_height]
             );
 
             button_solve = uicontrol (
@@ -698,7 +911,7 @@ classdef UI
                 "callback",
                 {@solve_gui},
                 "position",
-                [first_column eleventh_line 5 * view_width + 40 component_height]
+                [first_column fifteenth_line 5 * view_width + 40 component_height]
             );
 
             waitfor(obj.f)
@@ -891,8 +1104,6 @@ end
 function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view_begin)
     global obj
 
-    get(edit_begin, 'String');
-
     begin_pos = str2double(get(edit_begin, 'String'));
     end_pos = str2double(get(edit_end, 'String'));
     
@@ -912,6 +1123,57 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
         set(edit_coef, 'String', '');
     end
 end
+
+% TODO
+function getTensionProperties(hObject, eventdata, edit_momentum_inertia,
+ listbox_young_module, text_view_tension_properties)
+    global obj
+    
+    momentum_inertia = get(edit_momentum_inertia, 'String');
+    selection = get(listbox_young_module, 'Value')
+    if (length(momentum_inertia) > 0)
+        obj.young_module =  YoungModule().Values(selection);
+        obj.momentum_inertia = str2double(momentum_inertia);
+        text  = cstrcat("Momentum [", momentum_inertia, "]\nYoung Module [", num2str(obj.young_module), "]");
+        set(text_view_tension_properties, 'String', text);
+    end
+end
+
+function clearTensionProperties(hObject, eventdata, edit_momentum_inertia, listbox_young_module,
+                                     text_view_tension_properties)
+    global obj;
+    obj.young_module = 1;
+    obj.momentum_inertia = 1;
+
+    set(edit_momentum_inertia, 'String', '');
+    set(text_view_tension_properties, 'String', '');
+end
+
+
+function getTorsionProperties(hObject, eventdata, edit_polar_momentum_inertia, listbox_shear_module,
+                                text_view_torsion_properties)
+    global obj
+    polar_momentum_inertia = get(edit_polar_momentum_inertia, 'String');
+    selection = get(listbox_shear_module, 'Value');
+    
+    if (length(polar_momentum_inertia) > 0)
+        obj.polar_momentum_inertia = str2double(polar_momentum_inertia);
+        obj.shear_module = ShearModule().Values(selection);
+        text = cstrcat("Polar Momentum [", polar_momentum_inertia, "]\nShear Module [", num2str(obj.shear_module), "]");
+        set(text_view_torsion_properties, 'String', text);
+    end
+end
+
+function clearTorsionProperties(hObject, eventdata, edit_polar_momentum_inertia, listbox_shear_module,
+                                     text_view_torsion_properties)
+    global obj;
+    obj.shear_module = 1;
+    obj.polar_momentum_inertia = 1; 
+
+    set(edit_polar_momentum_inertia, 'String', '');
+    set(text_view_torsion_properties, 'String', '');    
+end
+
 
 function addTextViewText(view, text, beg_str)
     old_text  = get(view, 'String');
