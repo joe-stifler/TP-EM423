@@ -386,7 +386,7 @@ classdef    lib_resmat
                 c_3 = 0;
                 support_found = 0;
 
-                % find the C_6 constant (for the elongation equation)
+                % find the C_3 constant (for the elongation equation)
                 for i = 2:length(supports)
                     _support = supports(i);
 
@@ -401,10 +401,12 @@ classdef    lib_resmat
                         break;
                     end
                 end
-                
+
                 if support_found == 0
+                    % there is no contourn condition by the supports. we choose a reference point to be null
+
                     for j = 1:pos_vx-1
-                        c_3 = -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
+                        c_3 = c_3 -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
                     end
                 end
 
@@ -412,8 +414,6 @@ classdef    lib_resmat
                 Vx(pos_vx).mag = [c_3];
 
                 pos_vx = pos_vx + 1;
-
-
 
                 % slope calculation
                 if pos_vx > 1
@@ -429,15 +429,45 @@ classdef    lib_resmat
                     end
                 end
 
-
                 % integrate all terms to get the deflection
                 for i = 1:pos_vx-1
                     Vx(i).mag = polyint(Vx(i).mag);
                 end
 
-
                 % find the C_4 constant (for the slope equation)
+                c_4 = 0;
 
+                support_found = 0;
+
+                % find the C_4 constant (for the elongation equation)
+                for i = 2:length(supports)
+                    _support = supports(i);
+
+                    c_4 = 0;
+
+                    support_found = 1;
+
+                    for j = 1:pos_vx-1
+                        c_4 = c_4 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
+                    end
+
+                    break;
+                end
+
+                if support_found == 0
+                    % there is no contourn condition by the supports. we choose a reference point to be null
+
+                    c_4 = 0;
+
+                    for j = 1:pos_vx-1
+                        c_4 = c_4 -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
+                    end
+                end
+
+                Vx(pos_vx).pos = 0;
+                Vx(pos_vx).mag = [c_4];
+
+                pos_vx = pos_vx + 1;
 
                 % deflection calculation
                 if pos_vx > 1
@@ -486,7 +516,6 @@ classdef    lib_resmat
                 % integrate all terms to get the elongation
                 for i = 1:pos_hx-1
                     Hx(i).mag = polyint(Hx(i).mag);
-                    
                 end
 
                 support_found = 0;
@@ -510,6 +539,8 @@ classdef    lib_resmat
                 end
 
                 if support_found == 0
+                    % there is no contourn condition by the supports. we choose a reference point to be null
+
                     c_5 = 0;
 
                     for j = 1:pos_hx-1
@@ -536,8 +567,6 @@ classdef    lib_resmat
                         elongation(1, i) = -e / (young_module * momentum_inertia);
                     end
                 end
-
-
 
 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -595,6 +624,8 @@ classdef    lib_resmat
                 end
 
                 if support_found == 0
+                    % there is no contourn condition by the supports. we choose a reference point to be null
+                    
                     for j = 1:pos_tx-1
                         c_6 = c_6 -(polyval(Tx(j).mag, 0 - Tx(j).pos) * lib_resmat.delta(0 - Tx(j).pos));
                     end
