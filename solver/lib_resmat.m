@@ -1,7 +1,7 @@
 classdef    lib_resmat 
     methods ( Static = true )
         function val = delta(x)
-            if x >= 0
+            if x >= -1e-7
                 val = 1;
             else
                 val = 0;
@@ -310,7 +310,7 @@ classdef    lib_resmat
                 pos_vx = 1;
 
                 % add the vertical forces
-                for i = 1:length(vertical_forces)
+                for i = 2:length(vertical_forces)
                     v_force = vertical_forces(i);
 
                     Vx(pos_vx).pos = v_force.pos;
@@ -320,7 +320,7 @@ classdef    lib_resmat
                 end
 
                 % add the distributed forces
-                for i = 1:length(vertical_dist_forces)
+                for i = 2:length(vertical_dist_forces)
                     dist_v_force = vertical_dist_forces(i);
 
                     Vx(pos_vx).pos = dist_v_force.pos_beg;
@@ -381,9 +381,38 @@ classdef    lib_resmat
                 for i = 1:pos_vx-1
                     Vx(i).mag = polyint(Vx(i).mag);
                 end
-                
 
                 % find the C_3 constant (for the slope equation)
+                c_3 = 0;
+                support_found = 0;
+
+                % find the C_6 constant (for the elongation equation)
+                for i = 2:length(supports)
+                    _support = supports(i);
+
+                    % phi(x) = 0
+                    if _support.type == SupportType().Fixed
+                        support_found = 1;
+
+                        for j = 1:pos_vx-1
+                            c_3 = c_3 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
+                        end
+
+                        break;
+                    end
+                end
+                
+                if support_found == 0
+                    for j = 1:pos_vx-1
+                        c_3 = -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
+                    end
+                end
+
+                Vx(pos_vx).pos = 0;
+                Vx(pos_vx).mag = [c_3];
+
+                pos_vx = pos_vx + 1;
+
 
 
                 % slope calculation
@@ -431,7 +460,7 @@ classdef    lib_resmat
                 pos_hx = 1;
 
                 % add the horizontal forces
-                for i = 1:length(horizontal_forces)
+                for i = 2:length(horizontal_forces)
                     h_force = horizontal_forces(i);
 
                     Hx(pos_hx).pos = h_force.pos;
@@ -518,7 +547,7 @@ classdef    lib_resmat
                 pos_tx = 1;
 
                 % add the torque forces
-                for i = 1:length(torques)
+                for i = 2:length(torques)
                     t_force = torques(i);
 
                     Tx(pos_tx).pos = t_force.pos;
@@ -558,7 +587,7 @@ classdef    lib_resmat
                         support_found = 1;
 
                         for j = 1:pos_tx-1
-                            c_6 = -(polyval(Tx(j).mag, _support.pos - Tx(j).pos) * lib_resmat.delta(_support.pos - Tx(j).pos));
+                            c_6 = c_6 -(polyval(Tx(j).mag, _support.pos - Tx(j).pos) * lib_resmat.delta(_support.pos - Tx(j).pos));
                         end
 
                         break;
@@ -567,7 +596,7 @@ classdef    lib_resmat
 
                 if support_found == 0
                     for j = 1:pos_tx-1
-                        c_6 = -(polyval(Tx(j).mag, 0 - Tx(j).pos) * lib_resmat.delta(0 - Tx(j).pos));
+                        c_6 = c_6 -(polyval(Tx(j).mag, 0 - Tx(j).pos) * lib_resmat.delta(0 - Tx(j).pos));
                     end
                 end
 

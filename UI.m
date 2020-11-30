@@ -1184,8 +1184,6 @@ function solve_problem(obj)
         
         x = first_plot_x + [-0.025 -0.025] + force.pos * (plot_width / obj.data_beam_width);
 
-        force.mag
-
         if force.mag >= 0
             y = first_plot_y + [-0.05 0.08];
         else
