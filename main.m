@@ -7,10 +7,10 @@ _args = argv();
 % Verifies if some argument was passed
 % and if it is a octave script
 if length(_args) > 0 && _args{1}(end) == 'm'
-    args = _args{1}
+    args = _args{1} 
 end
 
-args = "tests/aula5_ex4.m";
+%args = "tests/aula5_ex4.m";
 
 obj = UI(args);
 
