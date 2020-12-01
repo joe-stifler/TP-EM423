@@ -59,11 +59,8 @@ classdef UI
             close all;
             clear h;
             
-            % Plotting
-            % Testing to 1920x1080 screen DELETE ME
-            screen_size = [1, 1, 1920, 1080];
 
-            % screen_size = get(0, 'ScreenSize');
+            screen_size = get(0, 'ScreenSize');
 
             obj.f = figure('Position', screen_size);
 
