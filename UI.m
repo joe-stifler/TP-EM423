@@ -692,7 +692,7 @@ classdef UI
                 "style",
                 "text",
                 "string",
-                "Momentum Inertia\n[kg.m^2]",
+                "Momentum Inertia\n[m^2]",
                 "position",
                 [second_column eleventh_line view_width component_height],
                 "enable",
@@ -794,7 +794,7 @@ classdef UI
                 "style",
                 "text",
                 "string",
-                "Polar Momentum\nInertia [kg.m^2]",
+                "Polar Momentum\nInertia [m^4]",
                 "position",
                 [second_column thirteenth_line view_width component_height],
                 "enable",
@@ -1031,7 +1031,7 @@ end
 function text = getTextFromTorques(data_torques)
     text = "";
     for i = 2:length(data_torques)
-        text = strcat(text, "[mag = ",  num2str(data_torques(i).mag), "Nm ] ");
+        text = strcat(text, "[pos = ", num2str(data_torques(i).pos), "m ; mag = ",  num2str(data_torques(i).mag), "Nm ], ");
     end
 end
 
@@ -1130,7 +1130,7 @@ function getTensionProperties(hObject, eventdata, edit_momentum_inertia,
     
     momentum_inertia = get(edit_momentum_inertia, 'String');
     selection = get(listbox_young_module, 'Value');
-    
+
     if (length(momentum_inertia) > 0)
         obj.young_module =  YoungModule().Values(selection);
         obj.momentum_inertia = str2double(momentum_inertia);
