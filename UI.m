@@ -1091,7 +1091,7 @@ function clearDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, vi
     global obj
 
     % Load my data
-    vertical_dist_forces(1) = DistForce(0, 0, "");
+    vertical_dist_forces(1) = DistForce(0, 0, "0");
     obj.data_vertical_dist_forces = vertical_dist_forces;
 
     set(view_begin, 'String', '');
@@ -1129,12 +1129,14 @@ function getTensionProperties(hObject, eventdata, edit_momentum_inertia,
     global obj
     
     momentum_inertia = get(edit_momentum_inertia, 'String');
-    selection = get(listbox_young_module, 'Value')
+    selection = get(listbox_young_module, 'Value');
+    
     if (length(momentum_inertia) > 0)
         obj.young_module =  YoungModule().Values(selection);
         obj.momentum_inertia = str2double(momentum_inertia);
         text  = cstrcat("Momentum [", momentum_inertia, "]\nYoung Module [", num2str(obj.young_module), "]");
         set(text_view_tension_properties, 'String', text);
+        set(edit_momentum_inertia, 'String', '');
     end
 end
 
@@ -1160,6 +1162,7 @@ function getTorsionProperties(hObject, eventdata, edit_polar_momentum_inertia, l
         obj.shear_module = ShearModule().Values(selection);
         text = cstrcat("Polar Momentum [", polar_momentum_inertia, "]\nShear Module [", num2str(obj.shear_module), "]");
         set(text_view_torsion_properties, 'String', text);
+        set(edit_polar_momentum_inertia, 'String', '');
     end
 end
 
