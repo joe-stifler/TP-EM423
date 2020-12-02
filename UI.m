@@ -470,7 +470,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "0",
+                "",
                 "position",
                 [second_column seventh_line view_width component_height]
             );
@@ -510,7 +510,7 @@ classdef UI
                 "string",
                 "Clear Horizontal Forces",
                 "callback",
-                {@clearHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag, text_view_horizontal_forces},
+                {@clearHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag, text_view_horizontal_forces, edit_horizontal_f_position},
                 "position",
                 [eight_column seventh_line 2 * view_width component_height]
             );
@@ -535,7 +535,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "0",
+                "",
                 "position",
                 [second_column eight_line view_width component_height]
             );
@@ -575,7 +575,7 @@ classdef UI
                 "string",
                 "Clear Torques",
                 "callback",
-                {@clearTorques, edit_torque, text_view_torques},
+                {@clearTorques, edit_torque, text_view_torques, edit_torque_pos},
                 "position",
                 [eight_column eight_line 2 * view_width component_height]
             );
@@ -962,13 +962,14 @@ function getVerticalForces(hObject, eventdata, edit_pos, edit_mag, view)
     end
 end
   
-function clearHorizontalForces(hObject, eventdata, edit_pos, edit_mag, view)
+function clearHorizontalForces(hObject, eventdata, edit_pos, edit_mag, view, view_pos)
     global obj
 
     horizontal_forces(1) = Force(0, 0);
     obj.data_horizontal_forces = horizontal_forces;
 
     set(view, 'String', '');
+    set(view_pos, 'String', '');
     set(edit_pos, 'String', "");
     set(edit_mag, 'String', "");
 end
@@ -986,7 +987,7 @@ function getHorizontalForces(hObject,eventdata, edit_pos, edit_mag, view)
         obj.data_horizontal_forces(length(obj.data_horizontal_forces) + 1) = Force(position, mag);
 
         set(view, 'String', getTextFromForces(obj.data_horizontal_forces));
-        % set(edit_pos, 'String', "");
+        set(edit_pos, 'String', "");
         set(edit_mag, 'String', "");
     end
 end
@@ -998,13 +999,14 @@ function text = getTextFromForces(data_forces)
     end
 end
 
-function clearTorques(hObject, eventdata, edit_mag, view)
+function clearTorques(hObject, eventdata, edit_mag, view, view_pos)
     global obj
 
     torque_forces(1) = Force(0, 0);
     obj.data_torques = torque_forces;
 
     set(view, 'String', '');
+    set(view_pos, 'String', '');
     set(edit_mag, 'String', "");
 end
 
@@ -1022,6 +1024,7 @@ function getTorques(hObject, eventdata, edit_pos, edit_mag, view)
 
         set(view, 'String', getTextFromTorques(obj.data_torques));
         set(edit_mag, 'String', "");
+        set(edit_pos, 'String', "");
     end
 end
 
@@ -1077,7 +1080,6 @@ function getSupports(hObject, eventdata, edit, listbox, listboxID, view)
             elseif obj.data_supports(i).type == SupportType().Fixed
                 text = strcat(text, "[pos = ", num2str(obj.data_supports(i).pos),  "m ; type = " , "Fixed", "], ");
             end
-
         end
 
         set(view, 'String', text);
@@ -1089,7 +1091,7 @@ function clearDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, vi
     global obj
 
     % Load my data
-    vertical_dist_forces(1) = DistForce(0, 0, @(x)(0), @(x)(0));
+    vertical_dist_forces(1) = DistForce(0, 0, "");
     obj.data_vertical_dist_forces = vertical_dist_forces;
 
     set(view_begin, 'String', '');
