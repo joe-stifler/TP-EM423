@@ -16,6 +16,7 @@ classdef UI
         section_area;
         radius1;
         radius2;
+        poisson_coef;
     end
 
     methods
@@ -35,6 +36,7 @@ classdef UI
             momentum_inertia = 1;
             torques(1) = Force(0, 0);
             shear_module = 1;
+            poisson_coef = 0;
             polar_momentum_inertia = 1;
             vertical_forces(1) = Force(0, 0);
             horizontal_forces(1) = Force(0, 0);
@@ -46,6 +48,7 @@ classdef UI
                 run(args);
             end
 
+            obj.poisson_coef = poisson_coef;
             obj.radius1 = radius1;
             obj.radius2 = radius2;
             obj.section_area = section_area;
@@ -373,9 +376,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column tenth_line 4 * view_width + 30 component_height],
-              "enable",
-              "inactive"
+              [sixth_column tenth_line 4 * view_width + 30 component_height]
             );
 
             text_view_rec_beam2 = uicontrol(
@@ -385,9 +386,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column eleventh_line 4 * view_width + 30 component_height],
-              "enable",
-              "inactive"
+              [sixth_column eleventh_line 4 * view_width + 30 component_height]
             );
 
             text_view_rec_beam3 = uicontrol(
@@ -397,9 +396,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column twelfth_line 4 * view_width + 30 component_height],
-              "enable",
-              "inactive"
+              [sixth_column twelfth_line 4 * view_width + 30 component_height]
             );
 
             button_add_rec_beam = uicontrol(
@@ -872,7 +869,7 @@ classdef UI
                 "string",
                 "Material property",
                 "position",
-                [sixth_column thirteenth_line 4 * view_width + 30 component_height],
+                [seventh_column thirteenth_line 3 * view_width + 20 component_height],
                 "enable",
                 "inactive"
             ); 
@@ -897,6 +894,18 @@ classdef UI
                 "Yield Strength (Pa): ",
                 "position",
                 [fourth_column thirteenth_line view_width component_height],
+                "enable",
+                "inactive"
+            );
+
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Poisson Coefficient: ",
+                "position",
+                [fifth_column thirteenth_line view_width component_height],
                 "enable",
                 "inactive"
             );
@@ -931,6 +940,16 @@ classdef UI
               [fourth_column fourteenth_line view_width component_height]
             );
 
+            edit_poisson_coef = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "0.33",
+              "position",
+              [fifth_column fourteenth_line view_width component_height]
+            );
+
             text_view_tension_properties = uicontrol(
               obj.f,
               "style",
@@ -938,9 +957,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column fourteenth_line 4 * view_width + 30 component_height],
-              "enable",
-              "inactive"
+              [seventh_column fourteenth_line 3 * view_width + 20 component_height]
             );
 
             button_set_rad_beam = uicontrol(
@@ -948,9 +965,9 @@ classdef UI
                 "string",
                 "Set",
                 "callback",
-                {@getMaterialProperties, edit_young_modulus, edit_shear_modulus, edit_yield_strength, text_view_tension_properties}, 
+                {@getMaterialProperties, edit_young_modulus, edit_shear_modulus, edit_yield_strength, edit_poisson_coef, text_view_tension_properties}, 
                 "position",
-                [fifth_column fourteenth_line view_width component_height]
+                [sixth_column fourteenth_line view_width component_height]
             );
 
             % Button
@@ -1274,20 +1291,22 @@ end
 
 % TODO
 function getMaterialProperties(hObject, eventdata,
- edit_young_modulus, edit_shear_modulus, edit_yield_strength, text_mat_props)
+ edit_young_modulus, edit_shear_modulus, edit_yield_strength, edit_poisson_coef, text_mat_props)
     global obj
     
+    poisson = get(edit_poisson_coef, 'String');
     young_module = get(edit_young_modulus, 'String');
     shear_module = get(edit_shear_modulus, 'String');
     yield_strength = get(edit_yield_strength, 'String');
 
-    if length(young_module) > 0 && length(shear_module) > 0 && length(yield_strength) > 0
+    if length(young_module) > 0 && length(shear_module) > 0 && length(yield_strength) > 0 && length(poisson) > 0
 
+        obj.poisson_coef = str2double(poisson);
         obj.young_module =  str2double(young_module);
         obj.shear_module = str2double(shear_module);
         obj.yield_strength = str2double(yield_strength);
 
-        text  = cstrcat("Young's modulus [", num2str(obj.young_module), " Pa]  \nShear's modulus [", num2str(obj.shear_module), " Pa]  \nYield Strength [", num2str(obj.yield_strength), " Pa]");
+        text  = cstrcat("Young's modulus [", num2str(obj.young_module), " Pa]  \nShear's modulus [", num2str(obj.shear_module), " Pa]  \nYield Strength [", num2str(obj.yield_strength), " Pa]  ", "Poisson [", num2str(obj.poisson_coef), "]");
 
         set(text_mat_props, 'String', text);
 
@@ -1631,7 +1650,7 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         obj.polar_momentum_inertia
     );
 
-    [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs] = lib_resmat.res_mat_1d_tension_solver(
+    [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs, eps_x, eps_y, eps_z, gama_x, gama_y, gama_z] = lib_resmat.res_mat_1d_tension_solver(
         h_inner_forces,
         t_inner_forces,
         v_inner_forces,
@@ -1644,12 +1663,31 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         obj.yield_strength,
         point_ref,
         obj.radius1,
-        obj.radius2
+        obj.radius2,
+        obj.poisson_coef
     );
 
     screen_size = get(0,'ScreenSize');
 
-    fig = figure('Position', screen_size);
+    pt_name = "";
+
+    if point_ref == PointType().A
+        pt_name = "A";
+    end
+
+    if point_ref == PointType().B
+        pt_name = "B";
+    end
+
+    if point_ref == PointType().C
+        pt_name = "C";
+    end
+
+    if point_ref == PointType().D
+        pt_name = "D";
+    end
+
+    fig = figure('name', strcat('Point: ', pt_name), 'Position', screen_size);
 
     clf;
     r = 4;
@@ -1697,7 +1735,7 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         pos_g,
         x_pos,
         principal_1,
-        'Principal normal Stress 1 (\sigma_1)',
+        'Main normal Stress 1 (\sigma_1)',
         "Beam Position (m) ",
         "Stress (Pa) ",
         [0 obj.data_beam_width],
@@ -1712,7 +1750,7 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         pos_g,
         x_pos,
         principal_2,
-        'Principal normal Stress 2 (\sigma_2)',
+        'Main normal Stress 2 (\sigma_2)',
         "Beam Position (m) ",
         "Stress (Pa) ",
         [0 obj.data_beam_width],
@@ -1727,7 +1765,7 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         pos_g,
         x_pos,
         principal_3,
-        'Principal normal Stress 3 (\sigma_3)',
+        'Main normal Stress 3 (\sigma_3)',
         "Beam Position (m) ",
         "Stress (Pa) ",
         [0 obj.data_beam_width],
@@ -1742,6 +1780,21 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         pos_g,
         x_pos,
         shear_max_plane,
+        'Maximum Shear Stress on Plane (\tau_{max})',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    hold on;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        -shear_max_plane,
         'Maximum Shear Stress on Plane (\tau_{max})',
         "Beam Position (m) ",
         "Stress (Pa) ",
@@ -1788,6 +1841,96 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         x_pos,
         von_mises_coefs,
         'Von Mises Coefficients',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        eps_x,
+        'Normal Deformation X (\epsilon_x)',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        eps_y,
+        'Normal Deformation Y (\epsilon_y)',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        eps_z,
+        'Normal Deformation Z (\epsilon_z)',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        gama_x,
+        'Shear Deformation X (\gamma_x)',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        gama_y,
+        'Shear Deformation Y (\gamma_y)',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        gama_z,
+        'Shear Deformation Z (\gamma_z)',
         "Beam Position (m) ",
         "Coefficient ",
         [0 obj.data_beam_width],

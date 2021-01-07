@@ -653,7 +653,7 @@ classdef    lib_resmat
             end
         end
 
-        function [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs] = res_mat_1d_tension_solver(
+        function [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs, eps_x, eps_y, eps_z, gama_x, gama_y, gama_z] = res_mat_1d_tension_solver(
                 h_inner_forces,
                 t_inner_forces,
                 v_inner_forces,
@@ -666,7 +666,8 @@ classdef    lib_resmat
                 yield_strength,
                 point_ref,
                 radius1,
-                radius2
+                radius2,
+                poisson
             )
 
             size_array = length(h_inner_forces);
@@ -682,6 +683,14 @@ classdef    lib_resmat
             shear_max_abs = zeros(1, size_array);
             tresca_coefs = zeros(1, size_array);
             von_mises_coefs = zeros(1, size_array);
+
+            eps_x = zeros(1, size_array);
+            eps_y = zeros(1, size_array);
+            eps_z = zeros(1, size_array);
+
+            gama_x = zeros(1, size_array);
+            gama_y = zeros(1, size_array);
+            gama_z = zeros(1, size_array);
 
             if point_ref == PointType().A
                 point_ref_y = max_radius;
@@ -753,6 +762,16 @@ classdef    lib_resmat
 
                 % computo dos coeficientes de seguranca por von mises
                 von_mises_coefs(i) = yield_strength / sqrt(((p_array(1) - p_array(2)) ** 2 + (p_array(2) - p_array(3)) ** 2 + (p_array(3) - p_array(1)) ** 2) / 2);
+
+
+                eps_x(i) = normal / young_module;
+                eps_y(i) = (0 - poisson * normal) / young_module;
+                eps_z(i) = (0 - poisson * normal) / young_module;
+
+                gama_x(i) = shear / shear_module;
+                gama_y(i) = 0;
+                gama_z(i) = 0;
+
             end
         end
     end
