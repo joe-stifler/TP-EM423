@@ -652,5 +652,108 @@ classdef    lib_resmat
                 end
             end
         end
+
+        function [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs] = res_mat_1d_tension_solver(
+                h_inner_forces,
+                t_inner_forces,
+                v_inner_forces,
+                m_inner_forces,
+                young_module,
+                momentum_inertia,
+                shear_module,
+                polar_momentum_inertia,
+                section_area,
+                yield_strength,
+                point_ref,
+                radius1,
+                radius2
+            )
+
+            size_array = length(h_inner_forces);
+
+            max_radius = max(radius1, radius2);
+
+            t_normal = zeros(1, size_array);
+            t_shear = zeros(1, size_array);
+            principal_1 = zeros(1, size_array);
+            principal_2 = zeros(1, size_array);
+            principal_3 = zeros(1, size_array);
+            shear_max_plane = zeros(1, size_array);
+            shear_max_abs = zeros(1, size_array);
+            tresca_coefs = zeros(1, size_array);
+            von_mises_coefs = zeros(1, size_array);
+
+            if point_ref == PointType().A
+                point_ref_y = max_radius;
+            end
+
+            if point_ref == PointType().B
+                point_ref_y = 0;
+            end
+
+            if point_ref == PointType().C
+                point_ref_y = -max_radius;
+            end
+
+            if point_ref == PointType().D
+                point_ref_y = 0;
+            end
+
+            for i = 1:size_array
+                shear = 0;
+
+                normal = 0;
+
+                % tensao normal devido as forcas normais
+                normal = normal + h_inner_forces(i) / section_area;
+
+                % tensao normal devido aos momentos
+                normal = normal - m_inner_forces(i) * point_ref_y / momentum_inertia;
+
+                % tensao de cisalhamento devido as forcas de corte
+                shear = shear - (4 / 3) * (v_inner_forces(i) / section_area) * ((radius1**2 + radius1 * radius2 + radius2**2) / (radius1**2 + radius2**2));
+
+                % tensao de cisalhamento devido as forcas de torque
+                torque = t_inner_forces(i);
+
+                if point_ref == PointType().B
+                    torque = -1 * torque;
+                end
+    
+                if point_ref == PointType().C
+                    torque = -1 * torque;
+                end
+
+                shear = shear + torque * max_radius / polar_momentum_inertia;
+
+                % computo final das tensoes normal e cizalhante
+
+                t_shear(1, i) = shear;
+
+                t_normal(i) = normal;
+
+                % computo das tensoes principais
+                p_1 = normal / 2 + sqrt((normal / 2) ** 2 + shear ** 2);
+                p_2 = normal / 2 - sqrt((normal / 2) ** 2 + shear ** 2);
+                p_3 = 0;
+
+                p_array = sort([p_1 p_2 p_3], "descend");
+
+                principal_1(i) = p_array(1);
+                principal_2(i) = p_array(2);
+                principal_3(i) = p_array(3);
+
+                % computo das tensoes de cisalhamento maximas absolutas
+                shear_max_plane(i) = sqrt((normal / 2) ** 2 + shear ** 2);
+
+                shear_max_abs(i) = (p_array(1) - p_array(3)) / 2;
+
+                % computo dos coeficientes de seguranca por tresca
+                tresca_coefs(i) = yield_strength / (p_array(1) - p_array(3));
+
+                % computo dos coeficientes de seguranca por von mises
+                von_mises_coefs(i) = yield_strength / sqrt(((p_array(1) - p_array(2)) ** 2 + (p_array(2) - p_array(3)) ** 2 + (p_array(3) - p_array(1)) ** 2) / 2);
+            end
+        end
     end
 end

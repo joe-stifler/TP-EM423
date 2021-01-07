@@ -14,6 +14,8 @@ classdef UI
         polar_momentum_inertia;
         yield_strength;
         section_area;
+        radius1;
+        radius2;
     end
 
     methods
@@ -24,6 +26,8 @@ classdef UI
             addpath('./solver');
 
             % Load my data
+            radius1 = 0;
+            radius2 = 0;
             beam_width = 0;
             young_module = 1;
             section_area = 0;
@@ -42,6 +46,8 @@ classdef UI
                 run(args);
             end
 
+            obj.radius1 = radius1;
+            obj.radius2 = radius2;
             obj.section_area = section_area;
             obj.yield_strength = yield_strength;
             obj.data_num_steps = 100;
@@ -84,6 +90,7 @@ classdef UI
             sixth_column = fifth_column + view_width + 10;
             seventh_column = sixth_column + view_width + 10;
             eight_column = seventh_column + view_width + 10;
+            ninth_column = eight_column + view_width + 10;
 
             zero_line = screen_size(4) - component_height - 10;
             first_line = zero_line - component_height - 10;
@@ -149,7 +156,7 @@ classdef UI
                 "string",
                 "Force Pointing Left (<-): Negative",
                 "position",
-                [eight_column zero_line 2 * view_width component_height]
+                [eight_column zero_line 2 * view_width + 10 component_height]
             );
 
 
@@ -192,7 +199,7 @@ classdef UI
                 "string",
                 "Distributed Forces Added",
                 "position",
-                [sixth_column third_line 4 * view_width + 20 component_height]
+                [sixth_column third_line 4 * view_width + 30 component_height]
             );  
 
             % Dist forces input
@@ -264,7 +271,7 @@ classdef UI
                 "callback",
                 {@clearDistForces,edit_dist_force_begin, edit_dist_force_end, edit_dist_force_coeficients, view_dist_force_begin},
                 "position",
-                [eight_column fourth_line 2 * view_width component_height]
+                [eight_column fourth_line 2 * view_width + 10 component_height]
             );
 
 
@@ -324,7 +331,7 @@ classdef UI
                 "string",
                 "Beam Properties",
                 "position",
-                [sixth_column ninth_line 4 * view_width + 20 component_height],
+                [sixth_column ninth_line 4 * view_width + 30 component_height],
                 "enable",
                 "inactive"
             );
@@ -366,7 +373,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column tenth_line 4 * view_width + 20 component_height],
+              [sixth_column tenth_line 4 * view_width + 30 component_height],
               "enable",
               "inactive"
             );
@@ -378,7 +385,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column eleventh_line 4 * view_width + 20 component_height],
+              [sixth_column eleventh_line 4 * view_width + 30 component_height],
               "enable",
               "inactive"
             );
@@ -390,7 +397,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column twelfth_line 4 * view_width + 20 component_height],
+              [sixth_column twelfth_line 4 * view_width + 30 component_height],
               "enable",
               "inactive"
             );
@@ -542,7 +549,7 @@ classdef UI
                 "string",
                 "Forces Added",
                 "position",
-                [sixth_column fifth_line 4 * view_width + 20 component_height],
+                [sixth_column fifth_line 4 * view_width + 30 component_height],
                 "enable",
                 "inactive"
             );
@@ -562,7 +569,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "75000",
+                "-75000",
                 "position",
                 [third_column sixth_line view_width component_height]
             );
@@ -595,7 +602,7 @@ classdef UI
                 "callback",
                 {@clearVerticalForces, edit_vertical_f_position, edit_vertical_f_mag, text_view_vertical_forces},
                 "position",
-                [eight_column sixth_line 2 * view_width component_height]
+                [eight_column sixth_line 2 * view_width + 10 component_height]
             );
 
             % Horizontal forces
@@ -658,7 +665,7 @@ classdef UI
                 "callback",
                 {@clearHorizontalForces, edit_horizontal_f_position, edit_horizontal_f_mag, text_view_horizontal_forces, edit_horizontal_f_position},
                 "position",
-                [eight_column seventh_line 2 * view_width component_height]
+                [eight_column seventh_line 2 * view_width + 10 component_height]
             );
 
 
@@ -723,7 +730,7 @@ classdef UI
                 "callback",
                 {@clearTorques, edit_torque, text_view_torques, edit_torque_pos},
                 "position",
-                [eight_column eight_line 2 * view_width component_height]
+                [eight_column eight_line 2 * view_width + 10 component_height]
             );
 
 
@@ -761,7 +768,7 @@ classdef UI
                 "string",
                 "Type Supports Added",
                 "position",
-                [sixth_column first_line 4 * view_width + 20 component_height],
+                [sixth_column first_line 4 * view_width + 30 component_height],
                 "enable",
                 "inactive"
             ); 
@@ -825,7 +832,7 @@ classdef UI
                 "callback",
                 {@clearSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3), text_view_horizontal_support},
                 "position",
-                [eight_column second_line 2 * view_width component_height]
+                [eight_column second_line 2 * view_width + 10 component_height]
             );
 
 
@@ -865,7 +872,7 @@ classdef UI
                 "string",
                 "Material property",
                 "position",
-                [sixth_column thirteenth_line 4 * view_width + 20 component_height],
+                [sixth_column thirteenth_line 4 * view_width + 30 component_height],
                 "enable",
                 "inactive"
             ); 
@@ -931,7 +938,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column fourteenth_line 4 * view_width + 20 component_height],
+              [sixth_column fourteenth_line 4 * view_width + 30 component_height],
               "enable",
               "inactive"
             );
@@ -946,15 +953,45 @@ classdef UI
                 [fifth_column fourteenth_line view_width component_height]
             );
 
-
-
             % Button
-            button_save = uicontrol(
+            button_tensions_point_a = uicontrol(
                 obj.f,
                 "string",
-                "Show Tension Diagrams",
+                "Stress Point A (y = max, z = 0)",
+                "callback",
+                {@show_tension_diagrams, PointType().A},
                 "position",
-                [sixth_column fifteenth_line 4 * view_width + 20 component_height]
+                [second_column fifteenth_line 2 * view_width + 10 component_height]
+            );
+
+            button_tensions_point_b = uicontrol(
+                obj.f,
+                "string",
+                "Stress Point B (y = 0, z = max)",
+                "callback",
+                {@show_tension_diagrams, PointType().B},
+                "position",
+                [fourth_column fifteenth_line 2 * view_width + 10 component_height]
+            );
+
+            button_tensions_point_c = uicontrol(
+                obj.f,
+                "string",
+                "Stress - Point C (y = min, z = 0)",
+                "callback",
+                {@show_tension_diagrams, PointType().C},
+                "position",
+                [sixth_column fifteenth_line 2 * view_width + 10 component_height]
+            );
+
+            button_tensions_point_d = uicontrol(
+                obj.f,
+                "string",
+                "Stress - Point D (y = 0, z = min)",
+                "callback",
+                {@show_tension_diagrams, PointType().D},
+                "position",
+                [eight_column fifteenth_line 2 * view_width + 10 component_height]
             );
 
             button_solve = uicontrol (
@@ -964,7 +1001,7 @@ classdef UI
                 "callback",
                 {@solve_gui},
                 "position",
-                [first_column fifteenth_line 5 * view_width + 40 component_height]
+                [first_column fifteenth_line view_width component_height]
             );
 
             waitfor(obj.f)
@@ -1018,6 +1055,10 @@ function getBeamWidthRad(hObject, eventdata, edit_rad_beam_width, edit_rad_beam_
     if length(beam_width) > 0 && length(beam_radius1) > 0 && length(beam_radius2) > 0
         radius1 = str2double(beam_radius1);
         radius2 = str2double(beam_radius2);
+
+        obj.radius1 = radius1;
+
+        obj.radius2 = radius2;
 
         obj.section_area = pi * (max(radius1, radius2)**2 - min(radius1, radius2)**2) / 4;
 
@@ -1289,8 +1330,6 @@ function plot_data(r, c, n, data_x, data_y, _title, x_label, y_label, x_limits, 
 end
 
 function solve_problem(obj)
-    printf("**************************************************\n")
-
     momentuns(1) = Force(0, 0);
 
     [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = lib_resmat.res_mat_1d_solver(
@@ -1302,8 +1341,6 @@ function solve_problem(obj)
         obj.data_supports,
         momentuns
     );
-
-    output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
 
     [x_pos, h_inner_forces, t_inner_forces, v_inner_forces, m_inner_forces, slope, deflection, elongation, torsion_angle] = lib_resmat.res_mat_1d_inner_solver(
         obj.data_beam_width,
@@ -1561,6 +1598,201 @@ function solve_problem(obj)
     set(gca,'ytick',[]);
 
     waitfor(fig)
+end
+
+
+function show_tension_diagrams(hobject, eventdata, point_ref)
+    global obj
+
+    momentuns(1) = Force(0, 0);
+
+    [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = lib_resmat.res_mat_1d_solver(
+        obj.data_beam_width,
+        obj.data_vertical_forces,
+        obj.data_horizontal_forces,
+        obj.data_torques,
+        obj.data_vertical_dist_forces,
+        obj.data_supports,
+        momentuns
+    );
+
+    [x_pos, h_inner_forces, t_inner_forces, v_inner_forces, m_inner_forces, slope, deflection, elongation, torsion_angle] = lib_resmat.res_mat_1d_inner_solver(
+        obj.data_beam_width,
+        v_forces,
+        h_forces,
+        t_forces,
+        support_momentuns,
+        obj.data_vertical_dist_forces,
+        obj.data_supports,
+        obj.data_num_steps,
+        obj.young_module,
+        obj.momentum_inertia,
+        obj.shear_module,
+        obj.polar_momentum_inertia
+    );
+
+    [t_normal, t_shear, principal_1, principal_2, principal_3, shear_max_plane, shear_max_abs, tresca_coefs, von_mises_coefs] = lib_resmat.res_mat_1d_tension_solver(
+        h_inner_forces,
+        t_inner_forces,
+        v_inner_forces,
+        m_inner_forces,
+        obj.young_module,
+        obj.momentum_inertia,
+        obj.shear_module,
+        obj.polar_momentum_inertia,
+        obj.section_area,
+        obj.yield_strength,
+        point_ref,
+        obj.radius1,
+        obj.radius2
+    );
+
+    screen_size = get(0,'ScreenSize');
+
+    fig = figure('Position', screen_size);
+
+    clf;
+    r = 4;
+    c = 4;
+
+    for n = 1 : r * c
+        subplot(r, c, n);
+    endfor
+
+    pos_g = 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        t_normal,
+        'Normal Stress (\sigma_x)',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        t_shear,
+        'Shear Stress (\tau_{xy})',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        principal_1,
+        'Principal normal Stress 1 (\sigma_1)',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        principal_2,
+        'Principal normal Stress 2 (\sigma_2)',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        principal_3,
+        'Principal normal Stress 3 (\sigma_3)',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        shear_max_plane,
+        'Maximum Shear Stress on Plane (\tau_{max})',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        shear_max_abs,
+        'Absolute Maximum Shear Stress (\tau_{max-abs})',
+        "Beam Position (m) ",
+        "Stress (Pa) ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        tresca_coefs,
+        'Tresca Coefficients',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
+
+    pos_g = pos_g + 1;
+
+    plot_data(
+        r,
+        c,
+        pos_g,
+        x_pos,
+        von_mises_coefs,
+        'Von Mises Coefficients',
+        "Beam Position (m) ",
+        "Coefficient ",
+        [0 obj.data_beam_width],
+        'red'
+    );
 end
 
 function ret = output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces)
