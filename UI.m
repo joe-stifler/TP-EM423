@@ -12,6 +12,8 @@ classdef UI
         momentum_inertia;
         shear_module;
         polar_momentum_inertia;
+        yield_strength;
+        section_area;
     end
 
     methods
@@ -24,6 +26,8 @@ classdef UI
             % Load my data
             beam_width = 0;
             young_module = 1;
+            section_area = 0;
+            yield_strength = 1;
             momentum_inertia = 1;
             torques(1) = Force(0, 0);
             shear_module = 1;
@@ -38,6 +42,8 @@ classdef UI
                 run(args);
             end
 
+            obj.section_area = section_area;
+            obj.yield_strength = yield_strength;
             obj.data_num_steps = 100;
             obj.data_beam_width = beam_width;
             obj.data_torques = torques;
@@ -59,7 +65,6 @@ classdef UI
             close all;
             clear h;
             
-
             screen_size = get(0, 'ScreenSize');
 
             obj.f = figure('Position', screen_size);
@@ -157,7 +162,7 @@ classdef UI
                 "string",
                 "Start [m]",
                 "position",
-                [second_column first_line view_width component_height]
+                [second_column third_line view_width component_height]
             );
 
             text_dist_force_end_label = uicontrol (
@@ -167,7 +172,7 @@ classdef UI
                 "string",
                 "End [m]",
                 "position",
-                [third_column first_line view_width component_height]
+                [third_column third_line view_width component_height]
             );
 
             text_dist_force_coeficients = uicontrol (
@@ -177,7 +182,7 @@ classdef UI
                 "string",
                 "Polynomial Coefficients",
                 "position",
-                [fourth_column first_line 2 * view_width + 10 component_height]
+                [fourth_column third_line view_width component_height]
             );  
             
             text_dist_force_coeficients = uicontrol (
@@ -187,7 +192,7 @@ classdef UI
                 "string",
                 "Distributed Forces Added",
                 "position",
-                [sixth_column first_line 4 * view_width + 20 component_height]
+                [sixth_column third_line 4 * view_width + 20 component_height]
             );  
 
             % Dist forces input
@@ -198,31 +203,37 @@ classdef UI
                 "string",
                 "Distribuited forces: ",
                 "position",
-                [first_column second_line view_width 2 * component_height + 10]
+                [first_column fourth_line view_width 2 * component_height + 10]
             ); 
 
             edit_dist_force_begin = uicontrol (
                 obj.f,
                 "style",
                 "edit",
+                "string",
+                "3",
                 "position",
-                [second_column second_line view_width component_height]
+                [second_column fourth_line view_width component_height]
             );
 
             edit_dist_force_end = uicontrol (
                 obj.f,
                 "style",
                 "edit",
+                "string",
+                "6",
                 "position",
-                [third_column second_line view_width component_height]
+                [third_column fourth_line view_width component_height]
             );
 
             edit_dist_force_coeficients = uicontrol (
                 obj.f,
                 "style",
                 "edit",
+                "string",
+                "2500, -15000",
                 "position",
-                [fourth_column second_line view_width component_height]
+                [fourth_column fourth_line view_width component_height]
             );
 
             % Dist forces view
@@ -231,7 +242,7 @@ classdef UI
                 "style",
                 "edit",
                 "position",
-                [sixth_column second_line view_width * 2 component_height]
+                [sixth_column fourth_line view_width * 2 component_height]
             );
 
             % Dist forces add button
@@ -242,7 +253,7 @@ classdef UI
                 "callback",
                 {@getDistForces, edit_dist_force_begin, edit_dist_force_end, edit_dist_force_coeficients, view_dist_force_begin},
                 "position",
-                [fifth_column second_line view_width component_height]
+                [fifth_column fourth_line view_width component_height]
             );
 
             % Dist forces add button
@@ -253,102 +264,237 @@ classdef UI
                 "callback",
                 {@clearDistForces,edit_dist_force_begin, edit_dist_force_end, edit_dist_force_coeficients, view_dist_force_begin},
                 "position",
-                [eight_column second_line 2 * view_width component_height]
+                [eight_column fourth_line 2 * view_width component_height]
             );
 
 
-            % Beam
-            text_beam_width = uicontrol(
+            % Rectangular Beam
+            text_rec_beam_width = uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
-                "Beam:",
+                "Rectangular Beam:",
                 "position",
-                [first_column fourth_line view_width 2 * component_height + 10],
+                [first_column tenth_line view_width 2 * component_height + 10],
                 "enable",
                 "inactive"
             );
 
-            text_beam_width = uicontrol(
+            text_rec_beam_width = uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
                 "Width [m]: ",
                 "position",
-                [second_column third_line view_width component_height],
+                [second_column ninth_line view_width component_height],
                 "enable",
                 "inactive"
             );
 
-            text_beam_width = uicontrol(
+            text_rec_beam_width = uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
                 "Height [m]: ",
                 "position",
-                [third_column third_line 3 * view_width + 20 component_height],
+                [third_column ninth_line view_width component_height],
                 "enable",
                 "inactive"
             );
 
-            text_beam_width = uicontrol(
+            text_rec_beam_width = uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
-                "Beam Width Setted",
+                "Depth [m]: ",
                 "position",
-                [sixth_column third_line 4 * view_width + 20 component_height],
+                [fourth_column ninth_line view_width component_height],
                 "enable",
                 "inactive"
             );
 
-            edit_beam_width = uicontrol(
+            text_rec_beam_width = uicontrol(
                 obj.f,
                 "style",
-                "edit",
+                "text",
                 "string",
-                "",
+                "Beam Properties",
                 "position",
-                [second_column fourth_line view_width component_height]
-            );
-
-            edit_beam_height = uicontrol(
-                obj.f,
-                "style",
-                "edit",
-                "string",
-                "0",
-                "position",
-                [third_column fourth_line view_width component_height],
+                [sixth_column ninth_line 4 * view_width + 20 component_height],
                 "enable",
                 "inactive"
             );
 
-            text_view_beam = uicontrol(
+            edit_rec_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "6",
+                "position",
+                [second_column tenth_line view_width component_height]
+            );
+
+            edit_rec_beam_height = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "0.4",
+                "position",
+                [third_column tenth_line view_width component_height]
+            );
+
+            edit_rec_beam_depth = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "0.2",
+                "position",
+                [fourth_column tenth_line view_width component_height]
+            );
+
+            text_view_rec_beam1 = uicontrol(
               obj.f,
               "style",
               "edit",
               "string",
               "",
               "position",
-              [sixth_column fourth_line 4 * view_width + 20 component_height],
+              [sixth_column tenth_line 4 * view_width + 20 component_height],
               "enable",
               "inactive"
             );
 
-            button_add_beam = uicontrol(
+            text_view_rec_beam2 = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "",
+              "position",
+              [sixth_column eleventh_line 4 * view_width + 20 component_height],
+              "enable",
+              "inactive"
+            );
+
+            text_view_rec_beam3 = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "",
+              "position",
+              [sixth_column twelfth_line 4 * view_width + 20 component_height],
+              "enable",
+              "inactive"
+            );
+
+            button_add_rec_beam = uicontrol(
                 obj.f,
                 "string",
-                "Set Width",
+                "Set",
                 "callback",
-                {@getBeamWidth, edit_beam_width, text_view_beam}, 
+                {@getBeamWidthRec, edit_rec_beam_width, edit_rec_beam_height, edit_rec_beam_depth, text_view_rec_beam1, text_view_rec_beam2, text_view_rec_beam3}, 
                 "position",
-                [fourth_column fourth_line 2 * view_width + 10 component_height]
+                [fifth_column tenth_line view_width component_height]
             );
+
+
+            % Radial Beam
+            text_rad_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Circular Beam:",
+                "position",
+                [first_column twelfth_line view_width 2 * component_height + 10],
+                "enable",
+                "inactive"
+            );
+
+            text_rad_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Width [m]: ",
+                "position",
+                [second_column eleventh_line view_width component_height],
+                "enable",
+                "inactive"
+            );
+
+            text_rad_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Radius 1 [m]: ",
+                "position",
+                [third_column eleventh_line view_width component_height],
+                "enable",
+                "inactive"
+            );
+
+            text_rad_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Radius 2 [m]: ",
+                "position",
+                [fourth_column eleventh_line view_width component_height],
+                "enable",
+                "inactive"
+            );
+
+            edit_rad_beam_width = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "6",
+                "position",
+                [second_column twelfth_line view_width component_height]
+            );
+
+            edit_rad_beam_height = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "0.4",
+                "position",
+                [third_column twelfth_line view_width component_height]
+            );
+
+            edit_rad_beam_depth = uicontrol(
+                obj.f,
+                "style",
+                "edit",
+                "string",
+                "0.2",
+                "position",
+                [fourth_column twelfth_line view_width component_height]
+            );
+
+            button_add_rad_beam = uicontrol(
+                obj.f,
+                "string",
+                "Set",
+                "callback",
+                {@getBeamWidthRad, edit_rad_beam_width, edit_rad_beam_height, edit_rad_beam_depth, text_view_rec_beam1, text_view_rec_beam2, text_view_rec_beam3}, 
+                "position",
+                [fifth_column twelfth_line view_width component_height]
+            );
+
 
 
             % Label
@@ -357,7 +503,7 @@ classdef UI
                 "style",
                 "text",
                 "string",
-                "Position [m]",
+                "Position in X [m]",
                 "position",
                 [second_column fifth_line view_width component_height],
                 "enable",
@@ -371,7 +517,7 @@ classdef UI
                 "string",
                 "Magnitude [N or Nm]",
                 "position",
-                [third_column fifth_line 3 * view_width + 20 component_height],
+                [third_column fifth_line view_width component_height],
                 "enable",
                 "inactive"
             );
@@ -406,7 +552,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "0",
                 "position",
                 [second_column sixth_line view_width component_height]
             );
@@ -416,7 +562,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "75000",
                 "position",
                 [third_column sixth_line view_width component_height]
             );
@@ -470,7 +616,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "3",
                 "position",
                 [second_column seventh_line view_width component_height]
             );
@@ -480,7 +626,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "10000",
                 "position",
                 [third_column seventh_line view_width component_height]
             );
@@ -535,7 +681,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "1",
                 "position",
                 [second_column eight_line view_width component_height]
             );
@@ -545,7 +691,7 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "900",
                 "position",
                 [third_column eight_line view_width component_height]
             );
@@ -591,7 +737,7 @@ classdef UI
                 "string",
                 "Position [m]: ",
                 "position",
-                [second_column ninth_line view_width component_height],
+                [second_column first_line view_width component_height],
                 "enable",
                 "inactive"
             ); 
@@ -603,7 +749,7 @@ classdef UI
                 "string",
                 "Type: ",
                 "position",
-                [third_column ninth_line 3 * view_width + 20 component_height],
+                [third_column first_line view_width component_height],
                 "enable",
                 "inactive"
             ); 
@@ -615,7 +761,7 @@ classdef UI
                 "string",
                 "Type Supports Added",
                 "position",
-                [sixth_column ninth_line 4 * view_width + 20 component_height],
+                [sixth_column first_line 4 * view_width + 20 component_height],
                 "enable",
                 "inactive"
             ); 
@@ -627,7 +773,7 @@ classdef UI
                 "string",
                 "Support: ",
                 "position",
-                [first_column tenth_line view_width 2 * component_height + 10],
+                [first_column second_line view_width 2 * component_height + 10],
                 "enable",
                 "inactive"
             ); 
@@ -637,9 +783,9 @@ classdef UI
                 "style",
                 "edit",
                 "string",
-                "",
+                "6",
                 "position",
-                [second_column tenth_line view_width component_height]
+                [second_column second_line view_width component_height]
             ); 
 
             listbox_horizontal_support = uicontrol(
@@ -649,7 +795,7 @@ classdef UI
                 "string",
                 {"Pinned", "Fixed", "Roller"},
                 "position",
-                [third_column tenth_line view_width component_height]
+                [third_column second_line view_width component_height]
             );
 
             text_view_horizontal_support = uicontrol(
@@ -659,7 +805,7 @@ classdef UI
               "string",
               "",
               "position",
-              [sixth_column tenth_line 2 * view_width component_height]
+              [sixth_column second_line 2 * view_width component_height]
             );
 
             button_add_horizontal_support = uicontrol(
@@ -669,7 +815,7 @@ classdef UI
                 "callback",
                 {@getSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3), text_view_horizontal_support},
                 "position",
-                [fourth_column tenth_line 2 * view_width + 10 component_height]
+                [fourth_column second_line 2 * view_width + 10 component_height]
             );
 
             button_clear_horizontal_support = uicontrol(
@@ -679,7 +825,7 @@ classdef UI
                 "callback",
                 {@clearSupports, edit_horizontal_support, listbox_horizontal_support, struct("Pinned", 1, "Fixed", 2, "Roller", 3), text_view_horizontal_support},
                 "position",
-                [eight_column tenth_line 2 * view_width component_height]
+                [eight_column second_line 2 * view_width component_height]
             );
 
 
@@ -687,138 +833,37 @@ classdef UI
 
 
             % Beam's tension properties
-            uicontrol(
-                obj.f,
-                "style",
-                "text",
-                "string",
-                "Momentum Inertia\n[m^2]",
-                "position",
-                [second_column eleventh_line view_width component_height],
-                "enable",
-                "inactive"
-            ); 
 
             uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
-                "Young module [GPa]",
-                "position",
-                [third_column eleventh_line 3 * view_width + 20 component_height],
-                "enable",
-                "inactive"
-            ); 
-
-            uicontrol(
-                obj.f,
-                "style",
-                "text",
-                "string",
-                "Tension properties added",
-                "position",
-                [sixth_column eleventh_line 4 * view_width + 20 component_height],
-                "enable",
-                "inactive"
-            ); 
-
-            uicontrol(
-                obj.f,
-                "style",
-                "text",
-                "string",
-                "Tension Properties: ",
-                "position",
-                [first_column twelfth_line view_width 2 * component_height + 10],
-                "enable",
-                "inactive"
-            ); 
-
-            edit_momentum_inertia = uicontrol(
-                obj.f,
-                "style",
-                "edit",
-                "string",
-                "",
-                "position",
-                [second_column twelfth_line view_width component_height]
-            ); 
-
-            listbox_young_module = uicontrol(
-                obj.f,
-                "style",
-                "listbox",
-                "string",
-                 YoungModule().Materials,
-                "position",
-                [third_column twelfth_line view_width component_height]
-            );
-
-            text_view_tension_properties = uicontrol(
-              obj.f,
-              "style",
-              "edit",
-              "string",
-              "",
-              "position",
-              [sixth_column twelfth_line 2 * view_width component_height],
-              "enable",
-              "inactive"
-            );
-
-            button_tension_properties = uicontrol(
-                obj.f,
-                "string",
-                "Add Properties",
-                "callback",
-                {@getTensionProperties, edit_momentum_inertia, listbox_young_module, text_view_tension_properties},
-                "position",
-                [fourth_column twelfth_line 2 * view_width + 10 component_height]
-            );
-
-            button_clear_tension_properties = uicontrol(
-                obj.f,
-                "string",
-                "Clear Properties",
-                "callback",
-                {@clearTorsionProperties, edit_momentum_inertia, listbox_young_module, text_view_tension_properties},
-                "position",
-                [eight_column twelfth_line 2 * view_width component_height]
-            );
-
-
-            % Beam torsion properties
-            uicontrol(
-                obj.f,
-                "style",
-                "text",
-                "string",
-                "Polar Momentum\nInertia [m^4]",
+                "Young's Modulus (Pa):",
                 "position",
                 [second_column thirteenth_line view_width component_height],
                 "enable",
                 "inactive"
-            ); 
+            );
 
             uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
-                "Shear module [GPa]",
+                "Shear's Modulus (Pa):",
                 "position",
-                [third_column thirteenth_line 3 * view_width + 20 component_height],
+                [third_column thirteenth_line view_width component_height],
                 "enable",
                 "inactive"
-            ); 
+            );
 
             uicontrol(
                 obj.f,
                 "style",
                 "text",
                 "string",
-                "Torsion properties added",
+                "Material property",
                 "position",
                 [sixth_column thirteenth_line 4 * view_width + 20 component_height],
                 "enable",
@@ -830,65 +875,76 @@ classdef UI
                 "style",
                 "text",
                 "string",
-                "Torsion Properties:",
+                "Material Properties: ",
                 "position",
                 [first_column fourteenth_line view_width 2 * component_height + 10],
                 "enable",
                 "inactive"
-            ); 
-
-            edit_polar_momentum_inertia = uicontrol(
-                obj.f,
-                "style",
-                "edit",
-                "string",
-                "",
-                "position",
-                [second_column fourteenth_line view_width component_height]
-            ); 
-
-            listbox_shear_module = uicontrol(
-                obj.f,
-                "style",
-                "listbox",
-                "string",
-                ShearModule().Materials,
-                "position",
-                [third_column fourteenth_line view_width component_height]
             );
 
-            text_view_torsion_properties = uicontrol(
+            uicontrol(
+                obj.f,
+                "style",
+                "text",
+                "string",
+                "Yield Strength (Pa): ",
+                "position",
+                [fourth_column thirteenth_line view_width component_height],
+                "enable",
+                "inactive"
+            );
+
+            edit_young_modulus = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "69e9",
+              "position",
+              [second_column fourteenth_line view_width component_height]
+            );
+
+            edit_shear_modulus = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "25.5e9",
+              "position",
+              [third_column fourteenth_line view_width component_height]
+            );
+
+            edit_yield_strength = uicontrol(
+              obj.f,
+              "style",
+              "edit",
+              "string",
+              "95e6",
+              "position",
+              [fourth_column fourteenth_line view_width component_height]
+            );
+
+            text_view_tension_properties = uicontrol(
               obj.f,
               "style",
               "edit",
               "string",
               "",
               "position",
-              [sixth_column fourteenth_line 2 * view_width component_height],
+              [sixth_column fourteenth_line 4 * view_width + 20 component_height],
               "enable",
               "inactive"
             );
 
-            button_torsion_properties = uicontrol(
+            button_set_rad_beam = uicontrol(
                 obj.f,
                 "string",
-                "Add Properties",
+                "Set",
                 "callback",
-                {@getTorsionProperties, edit_polar_momentum_inertia, listbox_shear_module, text_view_torsion_properties},
+                {@getMaterialProperties, edit_young_modulus, edit_shear_modulus, edit_yield_strength, text_view_tension_properties}, 
                 "position",
-                [fourth_column fourteenth_line 2 * view_width + 10 component_height]
+                [fifth_column fourteenth_line view_width component_height]
             );
-
-            button_torsion_properties = uicontrol(
-                obj.f,
-                "string",
-                "Clear Properties",
-                "callback",
-                {@clearTorsionProperties, edit_polar_momentum_inertia, listbox_shear_module, text_view_torsion_properties},
-                "position",
-                [eight_column fourteenth_line 2 * view_width component_height]
-            );
-
 
 
 
@@ -896,7 +952,7 @@ classdef UI
             button_save = uicontrol(
                 obj.f,
                 "string",
-                "Save Input",
+                "Show Tension Diagrams",
                 "position",
                 [sixth_column fifteenth_line 4 * view_width + 20 component_height]
             );
@@ -904,7 +960,7 @@ classdef UI
             button_solve = uicontrol (
                 obj.f,
                 "string",
-                "Solve",
+                "Show Inner Forces",
                 "callback",
                 {@solve_gui},
                 "position",
@@ -919,17 +975,69 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Callbacks                                                              % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function getBeamWidth(hObject, eventdata, editTxt, view)
+function getBeamWidthRec(hObject, eventdata, edit_rec_beam_width, edit_rec_beam_height, edit_rec_beam_depth, text_view_rec_beam1, text_view_rec_beam2, text_view_rec_beam3)
     global obj
 
-    beam_str = get(editTxt, 'String');
+    beam_width = get(edit_rec_beam_width, 'String');
+    beam_height = get(edit_rec_beam_height, 'String');
+    beam_depth = get(edit_rec_beam_depth, 'String');
 
-    if length(beam_str) > 0
-        obj.data_beam_width = abs(str2double(beam_str));
-        beam_str = mat2str(obj.data_beam_width);
+    if length(beam_width) > 0 && length(beam_height) > 0 && length(beam_depth) > 0
+        depth = str2double(beam_depth);
+        height = str2double(beam_height);
 
-        set(view, 'String', strcat(beam_str, 'm'));
-        set(editTxt, 'String', "");
+        obj.section_area = depth * height;
+
+        obj.momentum_inertia = (depth * height**3) / 12;
+
+        obj.polar_momentum_inertia = 2 * obj.momentum_inertia;
+
+        obj.data_beam_width = abs(str2double(beam_width));
+
+        text1  = cstrcat("Width = ", num2str(obj.data_beam_width), " m");
+        text2  = cstrcat("Section Area = ", num2str(obj.section_area), " m^2");
+        text3  = cstrcat("Momementum Inertia = ", num2str(obj.momentum_inertia), " m^4;   ", "Momementum Polar Inertia = ", num2str(obj.polar_momentum_inertia), " m^4");
+
+        set(text_view_rec_beam1, 'String', text1);
+        set(text_view_rec_beam2, 'String', text2);
+        set(text_view_rec_beam3, 'String', text3);
+
+        set(edit_rec_beam_width, 'String', "");
+        set(edit_rec_beam_height, 'String', "");
+        set(edit_rec_beam_depth, 'String', "");
+    end
+end
+
+function getBeamWidthRad(hObject, eventdata, edit_rad_beam_width, edit_rad_beam_height, edit_rad_beam_depth, text_view_rec_beam1, text_view_rec_beam2, text_view_rec_beam3)
+    global obj
+
+    beam_width = get(edit_rad_beam_width, 'String');
+    beam_radius1 = get(edit_rad_beam_height, 'String');
+    beam_radius2 = get(edit_rad_beam_depth, 'String');
+
+    if length(beam_width) > 0 && length(beam_radius1) > 0 && length(beam_radius2) > 0
+        radius1 = str2double(beam_radius1);
+        radius2 = str2double(beam_radius2);
+
+        obj.section_area = pi * (max(radius1, radius2)**2 - min(radius1, radius2)**2) / 4;
+
+        obj.momentum_inertia = pi * (max(radius1, radius2)**4 - min(radius1, radius2)**4) / 64;
+
+        obj.polar_momentum_inertia = 2 * obj.momentum_inertia;
+
+        obj.data_beam_width = abs(str2double(beam_width));
+
+        text1  = cstrcat("Width = ", num2str(obj.data_beam_width), " m");
+        text2  = cstrcat("Section Area = ", num2str(obj.section_area), " m^2");
+        text3  = cstrcat("Momementum Inertia = ", num2str(obj.momentum_inertia), " m^4;   ", "Momementum Polar Inertia = ", num2str(obj.polar_momentum_inertia), " m^4");
+
+        set(text_view_rec_beam1, 'String', text1);
+        set(text_view_rec_beam2, 'String', text2);
+        set(text_view_rec_beam3, 'String', text3);
+
+        set(edit_rad_beam_width, 'String', "");
+        set(edit_rad_beam_height, 'String', "");
+        set(edit_rad_beam_depth, 'String', "");
     end
 end
 
@@ -1111,7 +1219,7 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
     if length(fun_str) > 0
         beg_str = " , ";
 
-        addTextViewText(view_begin, [num2str(begin_pos) "m ; " num2str(end_pos) "m ; " fun_str], beg_str);
+        addTextViewText(view_begin, ["start = " num2str(begin_pos) "m ; end = " num2str(end_pos) "m ; pol = " fun_str], beg_str);
 
         new_dist_force = DistForce(begin_pos, end_pos, fun_str);
         
@@ -1124,58 +1232,29 @@ function getDistForces(hObject, eventdata, edit_begin, edit_end, edit_coef, view
 end
 
 % TODO
-function getTensionProperties(hObject, eventdata, edit_momentum_inertia,
- listbox_young_module, text_view_tension_properties)
+function getMaterialProperties(hObject, eventdata,
+ edit_young_modulus, edit_shear_modulus, edit_yield_strength, text_mat_props)
     global obj
     
-    momentum_inertia = get(edit_momentum_inertia, 'String');
-    selection = get(listbox_young_module, 'Value');
+    young_module = get(edit_young_modulus, 'String');
+    shear_module = get(edit_shear_modulus, 'String');
+    yield_strength = get(edit_yield_strength, 'String');
 
-    if (length(momentum_inertia) > 0)
-        obj.young_module =  YoungModule().Values(selection);
-        obj.momentum_inertia = str2double(momentum_inertia);
-        text  = cstrcat("Momentum [", momentum_inertia, "]\nYoung Module [", num2str(obj.young_module), "]");
-        set(text_view_tension_properties, 'String', text);
-        set(edit_momentum_inertia, 'String', '');
+    if length(young_module) > 0 && length(shear_module) > 0 && length(yield_strength) > 0
+
+        obj.young_module =  str2double(young_module);
+        obj.shear_module = str2double(shear_module);
+        obj.yield_strength = str2double(yield_strength);
+
+        text  = cstrcat("Young's modulus [", num2str(obj.young_module), " Pa]  \nShear's modulus [", num2str(obj.shear_module), " Pa]  \nYield Strength [", num2str(obj.yield_strength), " Pa]");
+
+        set(text_mat_props, 'String', text);
+
+        set(edit_young_modulus, 'String', '');
+        set(edit_shear_modulus, 'String', '');
+        set(edit_yield_strength, 'String', '');
     end
 end
-
-function clearTensionProperties(hObject, eventdata, edit_momentum_inertia, listbox_young_module,
-                                     text_view_tension_properties)
-    global obj;
-    obj.young_module = 1;
-    obj.momentum_inertia = 1;
-
-    set(edit_momentum_inertia, 'String', '');
-    set(text_view_tension_properties, 'String', '');
-end
-
-
-function getTorsionProperties(hObject, eventdata, edit_polar_momentum_inertia, listbox_shear_module,
-                                text_view_torsion_properties)
-    global obj
-    polar_momentum_inertia = get(edit_polar_momentum_inertia, 'String');
-    selection = get(listbox_shear_module, 'Value');
-    
-    if (length(polar_momentum_inertia) > 0)
-        obj.polar_momentum_inertia = str2double(polar_momentum_inertia);
-        obj.shear_module = ShearModule().Values(selection);
-        text = cstrcat("Polar Momentum [", polar_momentum_inertia, "]\nShear Module [", num2str(obj.shear_module), "]");
-        set(text_view_torsion_properties, 'String', text);
-        set(edit_polar_momentum_inertia, 'String', '');
-    end
-end
-
-function clearTorsionProperties(hObject, eventdata, edit_polar_momentum_inertia, listbox_shear_module,
-                                     text_view_torsion_properties)
-    global obj;
-    obj.shear_module = 1;
-    obj.polar_momentum_inertia = 1; 
-
-    set(edit_polar_momentum_inertia, 'String', '');
-    set(text_view_torsion_properties, 'String', '');    
-end
-
 
 function addTextViewText(view, text, beg_str)
     old_text  = get(view, 'String');
