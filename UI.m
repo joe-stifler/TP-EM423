@@ -1330,9 +1330,17 @@ function solve_gui(hObject, eventdata)
     solve_problem(obj)
 end
 
-function plot_data(r, c, n, data_x, data_y, _title, x_label, y_label, x_limits, dot_color)
+% Because of the discretisation chosen, there might be a case when a support position
+% is not ploted, therefore the bondary conditions do not apply correcty
+% in this case, the x_boundary and y_boundary should be specified.
+function plot_data(r, c, n, data_x, data_y, _title, x_label, y_label, x_limits, dot_color,
+x_boundary=[], y_boundary=[])
     subplot(r, c, n);
 
+    if (length(x_boundary) != 0)
+        data_x = [data_x, x_boundary];
+        data_y = [data_y, y_boundary];
+    end
     plot(data_x, data_y, '*', "linewidth", 5, 'color', dot_color);
 
     xlim(x_limits);
@@ -1440,6 +1448,16 @@ function solve_problem(obj)
         'green'
     );
 
+    % Boundary conditions for slope and fixed support
+    x_boundary = [];
+    y_boundary = [];
+    for i = 1:length(obj.data_supports)
+        support = obj.data_supports(i);
+        if (support.type == SupportType().Fixed)
+            x_boundary = [x_boundary, support.pos];
+            y_boundary = [y_boundary, 0];
+        end
+    end
     plot_data(
         r,
         c,
@@ -1450,9 +1468,22 @@ function solve_problem(obj)
         "Beam Position (m) ",
         "Slope (rad) ",
         [0 obj.data_beam_width],
-        'red'
+        'red',
+        x_boundary,
+        y_boundary
     );
 
+
+    % Boundary conditions for deflection and supports 
+    x_boundary = [];
+    y_boundary = [];
+    for i = 1:length(obj.data_supports)
+        support = obj.data_supports(i);
+        if (support.type != SupportType().Dummy)
+            x_boundary = [x_boundary, support.pos];
+            y_boundary = [y_boundary, 0];
+        end
+    end
     plot_data(
         r,
         c,
@@ -1463,7 +1494,9 @@ function solve_problem(obj)
         "Beam Position (m) ",
         "Deflection (m) ",
         [0 obj.data_beam_width],
-        'blue'
+        'blue',
+        x_boundary,
+        y_boundary
     );
 
     plot_data(
