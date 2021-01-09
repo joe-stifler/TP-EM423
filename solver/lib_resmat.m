@@ -719,18 +719,23 @@ classdef    lib_resmat
                 % tensao normal devido aos momentos
                 normal = normal - m_inner_forces(i) * point_ref_y / momentum_inertia;
 
-                % tensao de cisalhamento devido as forcas de corte
-                shear = shear - (4 / 3) * (v_inner_forces(i) / section_area) * ((radius1**2 + radius1 * radius2 + radius2**2) / (radius1**2 + radius2**2));
-
                 % tensao de cisalhamento devido as forcas de torque
                 torque = t_inner_forces(i);
 
                 if point_ref == PointType().B
                     torque = -1 * torque;
+
+                    % tensao de cisalhamento devido as forcas de corte (somente no ponto de y = 0)
+                    shear = shear - (4 / 3) * (v_inner_forces(i) / section_area) * ((radius1**2 + radius1 * radius2 + radius2**2) / (radius1**2 + radius2**2));
                 end
     
                 if point_ref == PointType().C
                     torque = -1 * torque;
+                end
+
+                if point_ref == PointType().D
+                    % tensao de cisalhamento devido as forcas de corte (somente no ponto de y = 0)
+                    shear = shear - (4 / 3) * (v_inner_forces(i) / section_area) * ((radius1**2 + radius1 * radius2 + radius2**2) / (radius1**2 + radius2**2));
                 end
 
                 shear = shear + torque * max_radius / polar_momentum_inertia;
