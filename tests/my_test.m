@@ -7,6 +7,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 beam_width = 6;
 
+shear_module = 25500000000;
+
+polar_momentum_inertia = 0.0023562;
+
+young_module = 69000000000;
+
+momentum_inertia = 0.0011781;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The vertical forces             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

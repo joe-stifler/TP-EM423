@@ -501,7 +501,7 @@ classdef    lib_resmat
 
                 % find the C_4 constant (for the elongation equation)
                 for i = 2:length(supports)
-                    _support = supports(i);
+                    _support = supports(length(supports) - i + 2);
 
                     c_4 = 0;
 
@@ -523,7 +523,8 @@ classdef    lib_resmat
                         end
                     end
 
-                    break;
+                    % break;
+                    c_4
                 end
 
                 Vx(pos_vx).pos = 0;

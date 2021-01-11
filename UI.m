@@ -1451,16 +1451,16 @@ function solve_problem(obj)
     );
 
     % Boundary conditions for slope and fixed support
-    % x_boundary = [];
-    % y_boundary = [];
-    % for i = 1:length(obj.data_supports)
-    %     support = obj.data_supports(i);
-    %     if (support.type == SupportType().Fixed)
-    %         x_boundary = [x_boundary, support.pos];
-    %         y_boundary = [y_boundary, 0];
-    %     end
-    % end
-
+    x_boundary = [];
+    y_boundary = [];
+    for i = 1:length(obj.data_supports)
+        support = obj.data_supports(i);
+        if (support.type == SupportType().Fixed)
+            x_boundary = [x_boundary, support.pos];
+            y_boundary = [y_boundary, 0];
+        end
+    end
+    
     plot_data(
         r,
         c,
@@ -1471,24 +1471,22 @@ function solve_problem(obj)
         "Beam Position (m) ",
         "Slope (rad) ",
         [0 obj.data_beam_width],
-        'red'
-        % ,
-        % x_boundary,
-        % y_boundary
+        'red',
+        x_boundary,
+        y_boundary
     );
 
 
     % Boundary conditions for deflection and supports 
-    % x_boundary = [];
-    % y_boundary = [];
-    % for i = 1:length(obj.data_supports)
-    %     support = obj.data_supports(i);
-    %     if (support.type != SupportType().Dummy)
-    %         x_boundary = [x_boundary, support.pos];
-    %         y_boundary = [y_boundary, 0];
-    %     end
-    % end
-
+    x_boundary = [];
+    y_boundary = [];
+    for i = 1:length(obj.data_supports)
+        support = obj.data_supports(i);
+        if (support.type != SupportType().Dummy)
+            x_boundary = [x_boundary, support.pos];
+            y_boundary = [y_boundary, 0];
+        end
+    end
     plot_data(
         r,
         c,
@@ -1499,10 +1497,9 @@ function solve_problem(obj)
         "Beam Position (m) ",
         "Deflection (m) ",
         [0 obj.data_beam_width],
-        'blue'
-        % ,
-        % x_boundary,
-        % y_boundary
+        'blue',
+        x_boundary,
+        y_boundary
     );
 
     plot_data(
