@@ -526,28 +526,6 @@ classdef    lib_resmat
                     break;
                 end
 
-                if support_found == 0
-                    % there is no contourn condition by the supports. we choose a reference point to be null
-
-                    c_4 = 0;
-
-                    for j = 1:pos_vx-1
-                        c_4 = c_4 -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
-                    end
-
-                    for k = 2:length(vertical_dist_forces)
-                        dist_v_force = vertical_dist_forces(k);
-
-                        if _support.pos >= dist_v_force.pos_beg
-                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
-
-                            if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
-                                c_4 = c_4 - (polyval([resultant_force.mag 0 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
-                            end
-                        end
-                    end
-                end
-
                 Vx(pos_vx).pos = 0;
                 Vx(pos_vx).mag = [c_4];
 
