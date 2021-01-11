@@ -1,10 +1,29 @@
 classdef    lib_resmat 
     methods ( Static = true )
         function val = delta(x)
-            if x >= -1e-7
+            if x >= 0
                 val = 1;
             else
                 val = 0;
+            end
+        end
+        
+        function resultant_force = calcresforce(dist_force, p_beg, p_end)
+            poly_int_res = polyint(dist_force.poly_func);
+
+            result_force_int = polyval(poly_int_res, p_end) - polyval(poly_int_res, p_beg);
+    
+            aux_poly = dist_force.poly_func;
+            aux_poly(length(aux_poly) + 1) = 0;
+            poly_int_res = polyint(aux_poly);
+
+            % calculates the centroid of the force (integrates from `beg` to `end`)
+            centroid = (polyval(poly_int_res, p_end) - polyval(poly_int_res, p_beg)) / result_force_int;
+
+            resultant_force = Force(centroid, result_force_int);
+
+            if isnan(resultant_force.mag)
+                resultant_force.mag = 0;
             end
         end
 
@@ -47,19 +66,7 @@ classdef    lib_resmat
 
                 if dist_force.pos_beg <= beam_width
                     % calculates the resultant force (integrates from `beg` to `end`)
-
-                    poly_int_res = polyint(dist_force.poly_func);
-
-                    result_force_int = polyval(poly_int_res, min(dist_force.pos_end, beam_width)) - polyval(poly_int_res, dist_force.pos_beg);
-            
-                    aux_poly = dist_force.poly_func;
-                    aux_poly(length(aux_poly) + 1) = 0;
-                    poly_int_res = polyint(aux_poly);
-
-                    % calculates the centroid of the force (integrates from `beg` to `end`)
-                    centroid = (polyval(poly_int_res, min(dist_force.pos_end, beam_width)) - polyval(poly_int_res, dist_force.pos_beg)) / result_force_int;
-
-                    resultant_force = Force(centroid, result_force_int);
+                    resultant_force = lib_resmat.calcresforce(dist_force, dist_force.pos_beg, min(dist_force.pos_end, beam_width));
                     
                     sum_vertical_forces = sum_vertical_forces + resultant_force.mag;
 
@@ -308,6 +315,7 @@ classdef    lib_resmat
                 torsion_angle = zeros(1, length(x_pos));
 
                 pos_vx = 1;
+                pos_dvx = 1;
 
                 % add the vertical forces
                 for i = 2:length(vertical_forces)
@@ -315,21 +323,6 @@ classdef    lib_resmat
 
                     Vx(pos_vx).pos = v_force.pos;
                     Vx(pos_vx).mag = [v_force.mag];
-
-                    pos_vx = pos_vx + 1;
-                end
-
-                % add the distributed forces
-                for i = 2:length(vertical_dist_forces)
-                    dist_v_force = vertical_dist_forces(i);
-
-                    Vx(pos_vx).pos = dist_v_force.pos_beg;
-                    Vx(pos_vx).mag = polyint(dist_v_force.poly_func);
-
-                    pos_vx = pos_vx + 1;
-
-                    Vx(pos_vx).pos = dist_v_force.pos_end;
-                    Vx(pos_vx).mag = -1 * polyint(dist_v_force.poly_func);
 
                     pos_vx = pos_vx + 1;
                 end
@@ -342,6 +335,18 @@ classdef    lib_resmat
                         
                         for j = 1:pos_vx-1
                             res_force = res_force + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if x >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    res_force = res_force + polyval([resultant_force.mag], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
+                                end
+                            end
                         end
 
                         v_inner_forces(1, i) = res_force;
@@ -373,9 +378,22 @@ classdef    lib_resmat
                             momentum_force = momentum_force + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
                         end
 
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if x >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    momentum_force = momentum_force + polyval([resultant_force.mag 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
+                                end
+                            end
+                        end
+
                         m_inner_forces(1, i) = momentum_force;
                     end
                 end
+
 
                 % integrate all terms to get the slope
                 for i = 1:pos_vx-1
@@ -398,15 +416,45 @@ classdef    lib_resmat
                             c_3 = c_3 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
                         end
 
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if _support.pos >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
+                                end
+                            end
+                        end
+
                         break;
                     end
                 end
 
                 if support_found == 0
                     % there is no contourn condition by the supports. we choose a reference point to be null
+                    % find the C_3 constant (for the elongation equation)
+                    for i = 2:length(supports)
+                        _support = supports(i);
 
-                    for j = 1:pos_vx-1
-                        c_3 = c_3 -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
+                        for j = 1:pos_vx-1
+                            c_3 = c_3 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
+                        end
+
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if _support.pos >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
+                                end
+                            end
+                        end
+
+                        break;
                     end
                 end
 
@@ -423,6 +471,18 @@ classdef    lib_resmat
                         
                         for j = 1:pos_vx-1
                             s = s + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if x >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    s = s + polyval([resultant_force.mag 0 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
+                                end
+                            end
                         end
 
                         slope(1, i) = s / (young_module * momentum_inertia);
@@ -451,6 +511,18 @@ classdef    lib_resmat
                         c_4 = c_4 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
                     end
 
+                    for k = 2:length(vertical_dist_forces)
+                        dist_v_force = vertical_dist_forces(k);
+
+                        if _support.pos >= dist_v_force.pos_beg
+                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+
+                            if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                c_4 = c_4 - (polyval([resultant_force.mag 0 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
+                            end
+                        end
+                    end
+
                     break;
                 end
 
@@ -461,6 +533,18 @@ classdef    lib_resmat
 
                     for j = 1:pos_vx-1
                         c_4 = c_4 -(polyval(Vx(j).mag, 0 - Vx(j).pos) * lib_resmat.delta(0 - Vx(j).pos));
+                    end
+
+                    for k = 2:length(vertical_dist_forces)
+                        dist_v_force = vertical_dist_forces(k);
+
+                        if _support.pos >= dist_v_force.pos_beg
+                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+
+                            if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                c_4 = c_4 - (polyval([resultant_force.mag 0 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
+                            end
+                        end
                     end
                 end
 
@@ -477,6 +561,18 @@ classdef    lib_resmat
                         
                         for j = 1:pos_vx-1
                             d = d + polyval(Vx(j).mag, x - Vx(j).pos) * lib_resmat.delta(x - Vx(j).pos);
+                        end
+
+                        for k = 2:length(vertical_dist_forces)
+                            dist_v_force = vertical_dist_forces(k);
+
+                            if x >= dist_v_force.pos_beg
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                
+                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                    d = d + polyval([resultant_force.mag 0 0 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
+                                end
+                            end
                         end
 
                         deflection(1, i) = d / (young_module * momentum_inertia);

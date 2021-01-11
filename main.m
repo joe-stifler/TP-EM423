@@ -10,7 +10,7 @@ if length(_args) > 0 && _args{1}(end) == 'm'
     args = _args{1} 
 end
 
-%args = "tests/aula5_ex4.m";  
+% args = "tests/my_test.m";  
 
 obj = UI(args);
 

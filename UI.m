@@ -1369,6 +1369,8 @@ function solve_problem(obj)
         momentuns
     );
 
+    output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces);
+
     [x_pos, h_inner_forces, t_inner_forces, v_inner_forces, m_inner_forces, slope, deflection, elongation, torsion_angle] = lib_resmat.res_mat_1d_inner_solver(
         obj.data_beam_width,
         v_forces,
