@@ -341,7 +341,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if x >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(x, dist_v_force.pos_end));
 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     res_force = res_force + polyval([resultant_force.mag], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
@@ -382,7 +382,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if x >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(x, dist_v_force.pos_end));
                                 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     momentum_force = momentum_force + polyval([resultant_force.mag 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
@@ -420,7 +420,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if _support.pos >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
@@ -446,7 +446,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if _support.pos >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
@@ -477,7 +477,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if x >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(x, dist_v_force.pos_end));
                                 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     s = s + polyval([resultant_force.mag 0 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
@@ -515,7 +515,7 @@ classdef    lib_resmat
                         dist_v_force = vertical_dist_forces(k);
 
                         if _support.pos >= dist_v_force.pos_beg
-                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, _support.pos);
+                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
 
                             if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                 c_4 = c_4 - (polyval([resultant_force.mag 0 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
@@ -545,7 +545,7 @@ classdef    lib_resmat
                             dist_v_force = vertical_dist_forces(k);
 
                             if x >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, x);
+                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(x, dist_v_force.pos_end));
                                 
                                 if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
                                     d = d + polyval([resultant_force.mag 0 0 0], x - resultant_force.pos) * lib_resmat.delta(x - resultant_force.pos);
