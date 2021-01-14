@@ -78,4 +78,5 @@ vertical_dist_forces(length(vertical_dist_forces) + 1) = DistForce(3, 6, "-2000"
 %     - SupportType().Roller       %
 %     - SupportType().Pinned       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-supports(length(supports) + 1) = Support(6, SupportType().Fixed);
+supports(length(supports) + 1) = Support(6, SupportType().Roller);
+supports(length(supports) + 1) = Support(0, SupportType().Fixed);

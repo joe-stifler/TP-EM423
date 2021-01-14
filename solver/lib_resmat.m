@@ -402,65 +402,65 @@ classdef    lib_resmat
 
                 % find the C_3 constant (for the slope equation)
                 c_3 = 0;
-                support_found = 0;
+                c_3_aux_count = 1;
+                x_3_aux_sum = [0 0];
+                c_3_aux_sum = [0 0];
+                support_found_c3 = 0;
 
                 % find the C_3 constant (for the elongation equation)
                 for i = 2:length(supports)
                     _support = supports(i);
 
-                    % phi(x) = 0
-                    if _support.type == SupportType().Fixed
-                        support_found = 1;
+                    c_3_aux = 0;
+                    c_4_aux = 0;
 
-                        for j = 1:pos_vx-1
-                            c_3 = c_3 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
-                        end
+                    for j = 1:pos_vx-1
+                        c_3_aux = c_3_aux + (polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
 
-                        for k = 2:length(vertical_dist_forces)
-                            dist_v_force = vertical_dist_forces(k);
+                        c_4_aux = c_4_aux + (polyval(polyint(Vx(j).mag), _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
+                    end
 
-                            if _support.pos >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
+                    for k = 2:length(vertical_dist_forces)
+                        dist_v_force = vertical_dist_forces(k);
 
-                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
-                                    c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
-                                end
+                        if _support.pos >= dist_v_force.pos_beg
+                            resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
+
+                            if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
+                                c_3_aux = c_3_aux + (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
+
+                                c_4_aux = c_4_aux + (polyval([resultant_force.mag 0 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
                             end
                         end
+                    end
+
+                    % phi(x) = 0
+                    if _support.type == SupportType().Fixed
+                        c_3 = -c_3_aux;
+
+                        support_found_c3 = 1;
 
                         break;
+                    else
+                        if c_3_aux_count < 3
+                            x_3_aux_sum(c_3_aux_count) = _support.pos;
+                            c_3_aux_sum(c_3_aux_count) = c_4_aux;
+
+                            c_3_aux_count = c_3_aux_count + 1;
+                        end
                     end
                 end
 
-                if support_found == 0
-                    % there is no contourn condition by the supports. we choose a reference point to be null
-                    % find the C_3 constant (for the elongation equation)
-                    for i = 2:length(supports)
-                        _support = supports(i);
+                if support_found_c3 == 0
+                    c_3 = (c_3_aux_sum(2) - c_3_aux_sum(1)) / (x_3_aux_sum(1) - x_3_aux_sum(2));
 
-                        for j = 1:pos_vx-1
-                            c_3 = c_3 -(polyval(Vx(j).mag, _support.pos - Vx(j).pos) * lib_resmat.delta(_support.pos - Vx(j).pos));
-                        end
-
-                        for k = 2:length(vertical_dist_forces)
-                            dist_v_force = vertical_dist_forces(k);
-
-                            if _support.pos >= dist_v_force.pos_beg
-                                resultant_force = lib_resmat.calcresforce(dist_v_force, dist_v_force.pos_beg, min(_support.pos, dist_v_force.pos_end));
-
-                                if !isnan(resultant_force.pos) && !isnan(resultant_force.mag)
-                                    c_3 = c_3 - (polyval([resultant_force.mag 0 0], _support.pos - resultant_force.pos) * lib_resmat.delta(_support.pos - resultant_force.pos));
-                                end
-                            end
-                        end
-
-                        break;
+                    if isnan(c_3)
+                        c_3 = 0;
                     end
                 end
 
                 Vx(pos_vx).pos = 0;
                 Vx(pos_vx).mag = [c_3];
-
                 pos_vx = pos_vx + 1;
 
                 % slope calculation
@@ -523,8 +523,7 @@ classdef    lib_resmat
                         end
                     end
 
-                    % break;
-                    c_4
+                    break;
                 end
 
                 Vx(pos_vx).pos = 0;
