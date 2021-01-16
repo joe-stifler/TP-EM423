@@ -70,6 +70,10 @@ classdef UI
             solve_problem(obj)
         end
 
+        function solve_tension(obj, point_ref)
+            solve_problem_tension(obj, point_ref)
+        end
+
         function build(obj)
             close all;
             clear h;
@@ -1077,9 +1081,9 @@ function getBeamWidthRad(hObject, eventdata, edit_rad_beam_width, edit_rad_beam_
 
         obj.radius2 = radius2;
 
-        obj.section_area = pi * (max(radius1, radius2)**2 - min(radius1, radius2)**2) / 4;
+        obj.section_area = pi * (max(radius1, radius2)**2 - min(radius1, radius2)**2);
 
-        obj.momentum_inertia = pi * (max(radius1, radius2)**4 - min(radius1, radius2)**4) / 64;
+        obj.momentum_inertia = pi * (max(radius1, radius2)**4 - min(radius1, radius2)**4) / 4;
 
         obj.polar_momentum_inertia = 2 * obj.momentum_inertia;
 
@@ -1637,6 +1641,11 @@ end
 function show_tension_diagrams(hobject, eventdata, point_ref)
     global obj
 
+    solve_problem_tension(obj, point_ref)
+end
+
+
+function solve_problem_tension(obj, point_ref)
     momentuns(1) = Force(0, 0);
 
     [v_forces, h_forces, t_forces, m_forces, v_dist_forces, X, support_momentuns] = lib_resmat.res_mat_1d_solver(
@@ -1950,6 +1959,8 @@ function show_tension_diagrams(hobject, eventdata, point_ref)
         [0 obj.data_beam_width],
         'red'
     );
+
+    waitfor(fig)
 end
 
 function ret = output_file(v_forces, h_forces, t_forces, m_forces, v_dist_forces)

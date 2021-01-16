@@ -782,6 +782,8 @@ classdef    lib_resmat
                 point_ref_y = 0;
             end
 
+            max_coeffs = [0 0];
+
             for i = 1:size_array
                 shear = 0;
 
@@ -839,9 +841,22 @@ classdef    lib_resmat
                 % computo dos coeficientes de seguranca por tresca
                 tresca_coefs(i) = yield_strength / (p_array(1) - p_array(3));
 
-                % computo dos coeficientes de seguranca por von mises
-                von_mises_coefs(i) = yield_strength / sqrt(((p_array(1) - p_array(2)) ** 2 + (p_array(2) - p_array(3)) ** 2 + (p_array(3) - p_array(1)) ** 2) / 2);
+                if p_array(1) - p_array(3) < 1e-5
+                    tresca_coefs(i) = -1;
+                end
 
+                max_coeffs(1) = max(max_coeffs(1), tresca_coefs(i));
+
+                div_von_mis_coef = sqrt(((p_array(1) - p_array(2)) ** 2 + (p_array(2) - p_array(3)) ** 2 + (p_array(3) - p_array(1)) ** 2) / 2);
+
+                % computo dos coeficientes de seguranca por von mises
+                von_mises_coefs(i) = yield_strength / div_von_mis_coef;
+
+                if div_von_mis_coef < 1e-5
+                    von_mises_coefs(i) = -1;
+                end
+
+                max_coeffs(2) = max(max_coeffs(2), von_mises_coefs(i));
 
                 eps_x(i) = normal / young_module;
                 eps_y(i) = (0 - poisson * normal) / young_module;
@@ -851,6 +866,16 @@ classdef    lib_resmat
                 gama_y(i) = 0;
                 gama_z(i) = 0;
 
+            end
+
+            for i = 1:size_array
+                if tresca_coefs(i) == -1
+                    tresca_coefs(i) = max_coeffs(1);
+                end
+
+                if von_mises_coefs(i) == -1
+                    von_mises_coefs(i) = max_coeffs(2);
+                end
             end
         end
     end

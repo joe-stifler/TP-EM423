@@ -17,5 +17,6 @@ obj = UI(args);
 if length(args) == 0
     obj.build();
 else
-    obj.solve()
+    % obj.solve()
+    obj.solve_tension(PointType().A)
 end
