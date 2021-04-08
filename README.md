@@ -13,6 +13,8 @@ The application was developed under the Octave Platform. However, it is compatib
 
 * **Bug-Fix of the Slope and Deflection related with the 2nd part of the project:** [Presentation Link](https://www.youtube.com/watch?v=BYi6ws3w4MM&ab_channel=Jos%C3%A9RibeiroNeto)
 
+**Final Grade in the discipline (considering one theoretical test besides the project): 10 / 10.**
+
 This program is capable of:
 
 * Solve the problems (beam 1D on the x axis, forces on the x and y axis, torques on the x axis, moments on the z axis) dealt with in EM423;
