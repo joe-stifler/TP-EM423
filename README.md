@@ -15,7 +15,19 @@ The application was developed under the Octave Platform. However, it is compatib
 
 **Final Grade in the discipline (considering one theoretical test besides the project): 10 / 10.**
 
-This program is capable of:
+# Project Members
+José Ribeiro Neto
+
+* RA: 176665
+* Email: <joseribeiro1017@gmail.com>
+
+Naomi Takemoto
+
+* RA: 184849
+* Email: <naomitkm1@gmail.com >
+
+
+# This program is capable of:
 
 * Solve the problems (beam 1D on the x axis, forces on the x and y axis, torques on the x axis, moments on the z axis) dealt with in EM423;
 * Dealing with forces (main and decomposed), torques and moments;
@@ -29,6 +41,6 @@ This program is capable of:
 * For the same points, find the deformations εx, εy, εz, γxy, γyz and γzx;
 * Check the safety coefficients referring to the Tresca Criterion and the von Mises Criterion.
 
-Following, we have the screenshots for the progam running:
+# Screenshots for the progam running:
 
 ![](screenshots.png?raw=true "Octave APP Screenshots")
