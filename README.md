@@ -24,7 +24,7 @@ José Ribeiro Neto
 Naomi Takemoto
 
 * RA: 184849
-* Email: <naomitkm1@gmail.com >
+* Email: <naomitkm1@gmail.com>
 
 
 # This program is capable of:
