@@ -1,21 +1,22 @@
 # TP-EM423
-Practical project of the discipline EM423 - Strength of Materials taught by professor Fabio Mazzariol Santiciolli
+Projeto prático da disciplina EM423 - Resistência dos Materiais ministrada pelo professor Fabio Mazzariol Santiciolli
 
-The application was developed under the Octave Platform. However, it is compatible with the Matlab environment. This project was divided into three parts:
+O aplicativo foi desenvolvido sob a Plataforma Octave. No entanto, é compatível com o ambiente Matlab. Este projeto foi dividido em três partes:
 
-* **1st part of the project:** Grade 10 / 10. [Presentation Link](https://www.youtube.com/watch?v=tY5Uk5oNjEo&ab_channel=Jos%C3%A9RibeiroNeto)
+* **1ª parte do projeto:** 10º / 10º ano.
 
-* **2nd part of the project:** Grade 10 / 10. [Presentation Link](https://www.youtube.com/watch?v=nd-3BpZ46NU&t=178s&ab_channel=Jos%C3%A9RibeiroNeto)
+* **2ª parte do projeto:** 10º / 10º ano.
 
-* **3rd part of the project:** Grade 10 / 10. [Presentation Link](https://www.youtube.com/watch?v=pWwNRbLH44Q&t=418s&ab_channel=Jos%C3%A9RibeiroNeto)
+* **3ª parte do projeto:** 10º / 10º ano.
 
-* **Bug-Fix of the Momentuns related with the 2nd part of the project:** [Presentation Link](https://www.youtube.com/watch?v=wFPNBJYpJzk&t=1s&ab_channel=Jos%C3%A9RibeiroNeto)
+* **Bug-Fix dos Momentuns relacionados com a 2ª parte do projeto.**
 
-* **Bug-Fix of the Slope and Deflection related with the 2nd part of the project:** [Presentation Link](https://www.youtube.com/watch?v=BYi6ws3w4MM&ab_channel=Jos%C3%A9RibeiroNeto)
+* **Bug-Fix da inclinação e deflexão relacionada com a 2ª parte do projeto.**
 
-**Final Grade in the discipline (considering one theoretical test besides the project): 10 / 10.**
+**Nota final na disciplina (considerando um teste teórico para além do projeto): 10/10.**
 
-# Project Members
+# Membros do Projeto
+
 José Ribeiro Neto
 
 * RA: 176665
@@ -26,21 +27,19 @@ Naomi Takemoto
 * RA: 184849
 * Email: <naomitkm1@gmail.com>
 
+# Este programa é capaz de:
 
-# This program is capable of:
+* Resolver os problemas (viga 1D no eixo x, forças nos eixos x e y, torques no eixo x, momentos no eixo z) tratados no EM423;
+* Lidar com forças (principais e decompostas), torques e momentos;
+* Lidar com cargas distribuídas em uma linha (polinômios);
+* Determinar reações de suporte; * Plotar os diagramas de força interna;
+* Receber propriedades (todas necessárias) do material e da seção transversal da viga;
+* Plotar os gráficos de inclinação e deflexão da viga;
+* Plote os gráficos de alongamento e ângulo de torção da viga;
+* Encontre tensões, tensões principais e tensões de cisalhamento absolutas máximas para os pontos extremos (positivos e negativos) em y e z em todas as seções transversais de vigas circulares e vigas circulares ocas;
+* Para os mesmos pontos, encontre as deformações εx, εy, εz, γxy, γyz e γzx;
+* Verifique os coeficientes de segurança referentes ao Critério de Tresca e ao Critério de von Mises.
 
-* Solve the problems (beam 1D on the x axis, forces on the x and y axis, torques on the x axis, moments on the z axis) dealt with in EM423;
-* Dealing with forces (main and decomposed), torques and moments;
-* Handle loads distributed over a line (polynomials);
-* Determine support reactions;
-* Plot the inner force diagrams;
-* Receive properties (all necessary) of the material and the cross section of the beam;
-* Plot the beam slope and deflection graphs;
-* Plot the beam elongation and torsion angle graphs;
-* Find Stresses, Main Stresses and Maximum Absolute Shear Stresses for the extreme points (positive and negative) in y and z in all cross sections of circular beams and hollow circular beams;
-* For the same points, find the deformations εx, εy, εz, γxy, γyz and γzx;
-* Check the safety coefficients referring to the Tresca Criterion and the von Mises Criterion.
-
-# Screenshots for the progam running:
+# Capturas de tela para o programa em execução:
 
 ![](screenshots.png?raw=true "Octave APP Screenshots")
